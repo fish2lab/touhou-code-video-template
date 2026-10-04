@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>剪纸人偶样张</title>
+<style>
+@font-face { font-family: WenKai; src: url(fonts/LXGWWenKai-Regular.ttf); font-display: block; }
+html, body { margin: 0; background: #d9d0bf; color: #221c26; font: 15px/1.4 WenKai, KaiTi, serif; }
+canvas { display: block; margin: 0 auto 16px; max-width: 100%; }
+#nav { padding: 8px 16px; } #nav a { color: #6d5d8c; margin-right: 12px; }
+</style>
+</head>
+<body>
+<!-- 开发用样张页：?who=patchouli|cirno|ran|meiling|remilia（默认全部），?sheet=poses|moods，?t=秒 固定时间（不传则动画播放） -->
+<div id="nav">
+  <a href="?who=patchouli">帕秋莉</a><a href="?who=cirno">琪露诺</a><a href="?who=ran">八云蓝</a><a href="?who=meiling">红美铃</a><a href="?who=remilia">蕾米莉亚</a><a href="?">全部</a>
+</div>
+<div id="wrap"></div>
+<script src="src/core.js"></script>
+<script src="src/kit.js"></script>
+<script src="src/rig.js"></script>
+<script src="src/character/patchouli.js"></script>
+<script src="src/character/cirno.js"></script>
+<script src="src/character/ran.js"></script>
+<script src="src/character/meiling.js"></script>
+<script src="src/character/remilia.js"></script>
+<script>
+// 每个角色：fn 画函数，poses 是 [姿势, 表情]，moods 是表情表，坐着/趴着的姿势在 lift 里给出抬高的像素，h 是并排时的全身高
+const CH = {
+  patchouli: { name: '帕秋莉', fn: drawPatchouli, h: 440, base: 600,
+    poses: [['stand', 'normal'], ['lecture', 'normal'], ['point', 'smug'], ['hide', 'flustered'], ['cross', 'pout'], ['sit', 'smile'], ['peek', 'normal'], ['tired', 'sleepy']],
+    lift: { sit: 100, peek: 160 }, moods: ['normal', 'smug', 'pout', 'flustered', 'annoyed', 'sleepy', 'surprised', 'smile'] },
+  cirno: { name: '琪露诺', fn: drawCirno, h: 440, base: 600,
+    poses: [['stand', 'normal'], ['proud', 'proud'], ['point', 'normal'], ['hold', 'happy'], ['think', 'confused'], ['slump', 'cry'], ['fly', 'happy'], ['throw', 'pout']],
+    lift: {}, moods: ['normal', 'proud', 'happy', 'surprised', 'confused', 'pout', 'cry'] },
+  ran: { name: '八云蓝', fn: drawRan, h: 560, base: 640,
+    poses: [['stand', 'normal'], ['read', 'normal'], ['point', 'happy'], ['present', 'proud'], ['think', 'awkward'], ['bow', 'normal']],
+    lift: {}, moods: ['normal', 'happy', 'surprised', 'awkward', 'proud'] },
+  meiling: { name: '红美铃', fn: drawMeiling, h: 500, base: 600,
+    poses: [['stand', 'normal'], ['doze', 'sleepy'], ['startle', 'flustered'], ['kungfu', 'smile']],
+    lift: {}, moods: ['normal', 'sleepy', 'flustered', 'smile', 'surprised'] },
+  remilia: { name: '蕾米莉亚', fn: drawRemilia, h: 440, base: 600,
+    poses: [['stand', 'normal'], ['point', 'smug'], ['cross', 'smug'], ['sit', 'smile'], ['parasol', 'normal'], ['slump', 'sleepy'], ['reach', 'annoyed']],
+    lift: { sit: 100 }, moods: ['normal', 'smug', 'smile', 'pout', 'surprised', 'annoyed', 'flustered', 'sleepy', 'yawn'] },
+};
+const chPaper = (c, w, h) => { c.fillStyle = P.paper; c.fillRect(0, 0, w, h); grain(c, polyPath(rectPts(0, 0, w, h)), .12); };
+function chPoses(who) { const S = CH[who], n = S.poses.length, W_ = Math.max(1800, n * 280), H_ = 760;
+  return { w: W_, h: H_, draw(c, t) { chPaper(c, W_, H_);
+    S.poses.forEach(([p, m], i) => { const x = W_ / n * (i + .5), lift = S.lift[p] || 0, y = S.base + 40 - lift;
+      rline(c, [[x - 115, y], [x + 115, y]], { w: 3, color: P.ink2, seed: i + 3 });
+      S.fn(c, { x, y, h: S.h, pose: p, mood: m, t: t + i * .37, blink: p === 'slump' || p === 'doze' ? 1 : blinkAt(t, i + 1), mouth: 0 });
+      zh(c, p + ' · ' + m, x, S.base + 100, { size: 28, align: 'center', color: P.ink2 }); }); } }; }
+function chMoods(who) { const S = CH[who], n = S.moods.length, rows = Math.ceil(n / 4), W_ = 2280, H_ = rows * 620 + 20;
+  return { w: W_, h: H_, draw(c, t) { chPaper(c, W_, H_);
+    S.moods.forEach((m, i) => { const cx = 285 + (i % 4) * 570, top = 20 + Math.floor(i / 4) * 620, hh = 1100;
+      c.save(); c.beginPath(); c.rect(cx - 285, top, 570, 560); c.clip();
+      S.fn(c, { x: cx, y: top + 1150, h: hh, pose: 'stand', mood: m, t, blink: Q.has('t') ? 0 : blinkAt(t, i + 2) });
+      c.restore(); zh(c, m, cx, top + 598, { size: 30, align: 'center', color: P.ink2 }); }); } }; }
+const chWho = Q.get('who') ? [Q.get('who')] : Object.keys(CH), chSel = Q.get('sheet'), chFixed = Q.has('t') ? +Q.get('t') : null, chCvs = [];
+for (const who of chWho) for (const [k, mk] of [['poses', chPoses], ['moods', chMoods]]) { if (chSel && chSel !== k) continue;
+  const S = mk(who), cv = document.createElement('canvas'); cv.width = S.w; cv.height = S.h; cv.id = who + '-' + k; cv.style.width = Math.min(S.w, 1600) + 'px';
+  document.getElementById('wrap').appendChild(cv); chCvs.push([cv.getContext('2d'), S]); }
+const chDraw = t => { for (const [c, S] of chCvs) { c.save(); S.draw(c, t); c.restore(); } };
+window.__chDraw = chDraw;
+document.fonts.load(`40px ${ZH}`, '帕秋莉').then(() => document.fonts.ready).then(start, start);
+function start() {
+  if (chFixed !== null) { chDraw(chFixed); window.__ready = true; return; }
+  const t0 = performance.now(); const loop = () => { chDraw((performance.now() - t0) / 1000); requestAnimationFrame(loop); }; loop(); window.__ready = true;
+}
+</script>
+</body>
+</html>

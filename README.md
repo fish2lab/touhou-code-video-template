@@ -1,6 +1,10 @@
-# 纯代码做一集东方视频（模板）
+# 纯代码做一集东方视频
 
-一个能直接开工的模板：**没有外部美术资源，没有 AI 生图**，整集科普视频的每一笔都是 JavaScript 在 Canvas 上画的——剪纸风的魔导书舞台、六个剪纸角色（帕秋莉、琪露诺、八云蓝、八云紫、红美铃、蕾米莉亚，统一身高）、手写字、油库里配音、背景音乐，最后逐帧渲染成 1080p MP4。
+没有外部美术资源，没有 AI 生图：整集科普视频的每一笔都是 JavaScript 在 Canvas 上画的。剪纸风的魔导书舞台、六个剪纸角色、手写字、油库里配音、背景音乐，最后逐帧渲染成 1080p MP4。
+
+**[介绍网页](https://fish2lab.github.io/touhou-code-video-template/)** · **[79 秒演示片](https://fish2lab.github.io/touhou-code-video-template/film/)** · **[十个特效](https://fish2lab.github.io/touhou-code-video-template/highlights/)** · [教程](docs/教程.md) · [经验](docs/经验.md)
+
+![六位剪纸角色并排站立，身高统一](site/media/lineup.jpg)
 
 出自「帕秋莉讲座」系列（[第 1 集](https://github.com/fish2lab/patchouli-lecture-1)、[第 2 集](https://github.com/fish2lab/patchouli-lecture-2)、[第 3 集](https://github.com/fish2lab/patchouli-lecture-3)）。本仓库把引擎、画具、角色和工具链抽出来，换成一段 80 秒的演示，讲的就是「这套东西怎么做」。
 

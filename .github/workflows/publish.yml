@@ -1,5 +1,5 @@
 # 唯一的一条 CI：构建单文件页面。
-#   推到 main → 只构建，检查能过。要同时部署 GitHub Pages：先在仓库 Settings → Pages 把 Source 选成 GitHub Actions，
+#   推到 main → 只构建，检查能过。要同时部署 GitHub Pages（介绍网页 site/ + 演示片 film/ + 特效总览 highlights/）：先在仓库 Settings → Pages 把 Source 选成 GitHub Actions，
 #   再在 Settings → Secrets and variables → Actions → Variables 加 ENABLE_PAGES=true（私有仓库要付费计划才有 Pages）
 #   推 v* 标签，或提交信息里带 [release] → 另外逐帧渲染 1080p MP4，一起发到 Release
 #   （标签名取 package.json 的 version；由 CI 自己打标签，适合不能直接推标签的环境）
@@ -48,9 +48,17 @@ jobs:
           files: |
             touhou-code-video-template.html
             out/touhou-code-video-template.mp4
+      - name: assemble site (pages only)
+        if: github.ref == 'refs/heads/main' && vars.ENABLE_PAGES == 'true'
+        run: |
+          mkdir -p _site/film _site/highlights
+          cp -r site/. _site/
+          cp dist/index.html _site/film/index.html
+          cp docs/亮点.html _site/highlights/index.html
+          cp -r docs/fx _site/highlights/fx
       - if: github.ref == 'refs/heads/main' && vars.ENABLE_PAGES == 'true'
         uses: actions/upload-pages-artifact@v3
-        with: { path: dist }
+        with: { path: _site }
   pages:
     if: github.ref == 'refs/heads/main' && vars.ENABLE_PAGES == 'true'
     needs: build

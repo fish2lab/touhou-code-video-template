@@ -23,8 +23,8 @@ function s1Draw(c, tau, L) {
   zh(c, `t = ${tau.toFixed(1)} s`, mx, y + 66, { size: 34, align: 'center', color: P.purple, al: sm(1.4, 1.9, tau) });
   // 右页：一行大字
   const f = '画面 = f ( t )';
-  zh(c, f, R.x + R.w / 2, R.y + 270, { size: 92, align: 'center', color: P.ink, p: writeP(tau, S1T(0) + .4, f, .1) });
-  zh(c, '同一个 t，永远是同一张画', R.x + R.w / 2, R.y + 335, { size: 38, align: 'center', color: P.ink2, p: writeP(tau, S1T(0) + 1.6, '同一个 t，永远是同一张画', .07) });
+  zh(c, f, R.x + R.w / 2 - 110, R.y + 270, { size: 92, align: 'center', color: P.ink, p: writeP(tau, S1T(0) + .4, f, .1) });
+  zh(c, '同一个 t，永远是同一张画', R.x + R.w / 2 - 110, R.y + 335, { size: 38, align: 'center', color: P.ink2, p: writeP(tau, S1T(0) + 1.6, '同一个 t，永远是同一张画', .07) });
   // 两人
   drawPatchouli(c, { ...STD.pch, pose: tau > S1T(2) ? 'point' : 'lecture', mood: moodOf(L, 'patchouli', 'normal'), mouth: mouthOf(L, 'patchouli'), blink: blinkAt(tau), t: tau });
   drawCirno(c, { ...STD.cir, pose: tau > S1T(1) && tau < S1T(2) ? 'think' : 'stand', mood: moodOf(L, 'cirno', 'normal'), mouth: mouthOf(L, 'cirno'), blink: blinkAt(tau, 2), t: tau });

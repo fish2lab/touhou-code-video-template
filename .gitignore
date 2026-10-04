@@ -4,3 +4,4 @@ dist/
 fonts/*.ttf
 .claude/
 .DS_Store
+_site/

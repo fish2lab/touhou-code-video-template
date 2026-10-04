@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>纯代码做一集东方视频</title>
+<meta name="description" content="没有外部美术资源，没有 AI 生图：用 Canvas 2D 剪纸风引擎、六个剪纸角色和一条出片工具链，做一集东方科普视频的开源模板。">
+<style>
+:root {
+  --bg: #fcfcfb; --fg: #1b1a1f; --muted: #6c6872; --line: #e3e1e6; --code-bg: #f3f2f4; --link: #4b3b7a; --media-bg: #14111a;
+}
+@media (prefers-color-scheme: dark) { :root { --bg: #151419; --fg: #e8e6ec; --muted: #9a96a3; --line: #2b2932; --code-bg: #1d1c22; --link: #b9a9e6; --media-bg: #000; color-scheme: dark; } }
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.75 system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+a { color: var(--link); text-underline-offset: .18em; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+.wrap { max-width: 680px; margin-inline: auto; padding-inline: 20px; }
+.wide { max-width: 860px; margin-inline: auto; padding-inline: 20px; }
+nav { display: flex; flex-wrap: wrap; gap: 6px 22px; padding-block: 22px; font-size: 14px; color: var(--muted); border-bottom: 1px solid var(--line); }
+nav a { color: var(--muted); text-decoration: none; }
+nav a:hover { color: var(--fg); }
+nav .name { color: var(--fg); margin-right: auto; font-weight: 600; letter-spacing: .02em; }
+header.top { padding-block: 64px 28px; }
+h1 { font-size: clamp(30px, 6vw, 42px); line-height: 1.25; margin: 0 0 18px; letter-spacing: -.01em; font-weight: 700; text-wrap: balance; }
+h2 { font-size: 22px; line-height: 1.4; margin: 72px 0 14px; font-weight: 650; text-wrap: balance; }
+p { margin: 0 0 18px; }
+.lead { font-size: 19px; color: var(--fg); }
+.links { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 22px; font-size: 16px; }
+figure { margin: 30px 0; }
+figure video, figure img { display: block; width: 100%; height: auto; background: var(--media-bg); border-radius: 4px; }
+figcaption { margin-top: 10px; font-size: 14px; line-height: 1.6; color: var(--muted); }
+pre, code { font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace; }
+code { font-size: .88em; background: var(--code-bg); padding: .1em .35em; border-radius: 3px; }
+pre { background: var(--code-bg); border-radius: 4px; padding: 16px 18px; overflow-x: auto; font-size: 14px; line-height: 1.6; margin: 22px 0; }
+pre code { background: none; padding: 0; font-size: inherit; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 20px; margin: 30px 0; }
+.grid figure { margin: 0; }
+.grid figcaption b { color: var(--fg); font-weight: 600; }
+ol.steps { padding-left: 1.3em; margin: 0 0 18px; }
+ol.steps li { margin-bottom: 8px; padding-left: 4px; }
+.chain { font-size: 15px; color: var(--muted); }
+footer { margin-top: 96px; padding-block: 28px 64px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.7; color: var(--muted); }
+footer p { margin-bottom: 10px; }
+@media (max-width: 640px) { body { font-size: 16px; } header.top { padding-block: 40px 20px; } .grid { grid-template-columns: 1fr; } h2 { margin-top: 56px; } }
+@media (prefers-reduced-motion: reduce) { video[autoplay] { animation: none; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <span class="name">纯代码做东方视频</span>
+    <a href="film/">演示片</a>
+    <a href="highlights/">十个特效</a>
+    <a href="https://github.com/fish2lab/touhou-code-video-template/blob/main/docs/%E6%95%99%E7%A8%8B.md">教程</a>
+    <a href="https://github.com/fish2lab/touhou-code-video-template">GitHub</a>
+  </nav>
+
+  <header class="top">
+    <h1>纯代码做一集东方视频</h1>
+    <p class="lead">这是一个模板。整集科普视频没有一张外部图片，也没有 AI 生图：剪纸风的魔导书、六个角色、手写字、配音和背景音乐，每一笔都是 JavaScript 在 Canvas 上画的，最后逐帧渲染成 MP4。</p>
+    <div class="links">
+      <a href="https://github.com/fish2lab/touhou-code-video-template">源码</a>
+      <a href="film/">看完整演示片（79 秒，有声音）</a>
+      <a href="highlights/">十个可复用的特效</a>
+    </div>
+  </header>
+</div>
+
+<div class="wide">
+  <figure>
+    <video autoplay muted loop playsinline preload="metadata" src="media/film-cast.mp4"></video>
+    <figcaption>六位角色同台，身高统一。这一段是模板自带的演示场景，写在 <code>src/scenes/1-cast.js</code> 里。</figcaption>
+  </figure>
+</div>
+
+<main class="wrap">
+
+  <h2>画面是时间的函数</h2>
+  <p>引擎的核心只有一条规则：每一帧只由全片时间 t 决定。不存状态，不用 <code>Math.random()</code>，要「随机」就用带种子的 <code>hash</code>。同一个 t，永远画出同一张图。</p>
+  <p>所以可以跳到任意一秒，可以把全片切开并行渲染，机器再慢，成片也不会掉帧。下面的月牙在时间轴上的位置，就是一行关键帧插值：</p>
+<pre><code>const u = key(tau, [[1.2, 0], [S1T(2), 0], [S1T(2) + 3.5, 1], [S1DUR, 1]], easeIO);
+drawMoonIcon(c, lerp(x0, x1, u), y - 62, 44, P.moon, -.5 + u * 3);</code></pre>
+</main>
+
+<div class="wide">
+  <figure>
+    <img src="media/frames-time.jpg" width="1560" height="584" alt="同一个场景在 2、5、8、11、14、17 秒的六帧画面，月牙沿时间轴从左走到右" loading="lazy">
+    <figcaption>同一个场景在 2、5、8、11、14、17 秒的画面（<code>src/scenes/2-time.js</code>）。拖到哪一秒，画面就是哪一秒的样子。</figcaption>
+  </figure>
+</div>
+
+<main class="wrap">
+
+  <h2>剪纸的边，手绘的抖</h2>
+  <p>画面的质感来自两件小事。剪纸：边不是曲线，是一段一段略带折角的直线，再垫一层软影。手绘：线每秒换八次种子，看起来像在呼吸。两件事都只有几十行代码，不依赖任何素材。</p>
+</main>
+
+<div class="wide">
+  <figure>
+    <video autoplay muted loop playsinline preload="metadata" src="media/film-paper.mp4"></video>
+    <figcaption>左边是数学上的圆，右边是剪刀剪出来的纸；下面两根线，上面那根固定种子，下面那根每秒换八次。</figcaption>
+  </figure>
+</div>
+
+<main class="wrap">
+
+  <h2>六个角色，一个身高</h2>
+  <p>帕秋莉、琪露诺、蕾米莉亚、红美铃、八云蓝、八云紫。每个角色都是一组剪纸部件，绕着脖子、肩、肘转动，边缘不抖，「活」来自整片轻晃和投影。全员默认身高 500，并排站才整齐。</p>
+</main>
+
+<div class="wide">
+  <figure>
+    <img src="media/lineup.jpg" width="1600" height="507" alt="六位纸片人并排站立，帽顶对齐在同一高度" loading="lazy">
+    <figcaption>全部是 Canvas 代码画的，没有加载任何图片。样张页 <code>character.html</code> 可以看每个角色的全部姿势和表情。</figcaption>
+  </figure>
+</div>
+
+<main class="wrap">
+
+  <h2>十个现成的特效</h2>
+  <p>从前五集里提炼出十段最好看的动画，每段是一个独立的模块，头注释写了出处、好在哪、怎么复用、怎么改。挂进一集只要一行：</p>
+<pre><code>fxScene({ id: 'nap-fall', lines: LINES, over: (c, tau, L) =&gt; { /* 叠上自己的角色 */ } });
+fxPlay('pinwheel-tiles', c, tau, { box: [x, y, w, h], t0: 1.2, speed: 1.5 });</code></pre>
+</main>
+
+<div class="wide">
+  <div class="grid">
+    <figure>
+      <video autoplay muted loop playsinline preload="metadata" src="media/fx-nap-fall.mp4"></video>
+      <figcaption><b>打盹掉进深睡</b><br>第 4 集 小睡段</figcaption>
+    </figure>
+    <figure>
+      <video autoplay muted loop playsinline preload="metadata" src="media/fx-pinwheel-tiles.mp4"></video>
+      <figcaption><b>冰块按风车形铺满蓝格板</b><br>第 5 集 风车段</figcaption>
+    </figure>
+    <figure>
+      <video autoplay muted loop playsinline preload="metadata" src="media/fx-ice-slabs.mp4"></video>
+      <figcaption><b>半透明冰板叠层</b><br>第 2 集 巩固段</figcaption>
+    </figure>
+    <figure>
+      <video autoplay muted loop playsinline preload="metadata" src="media/fx-sky-dial.mp4"></video>
+      <figcaption><b>昼夜转盘与纸雕灯箱视差</b><br>第 1 集 睡眠段</figcaption>
+    </figure>
+  </div>
+</div>
+
+<main class="wrap">
+  <p><a href="highlights/">看全部十个，每个有联系表和说明 →</a></p>
+
+  <h2>声音也是代码</h2>
+  <p>配音走一条很土的链：汉字转拼音，拼音转日文假名，假名交给 AquesTalk 合成，就是「油库里」那种腔调。同时从音频里算出每一帧的响度，让角色按真实的音量张嘴。背景音乐是浏览器里现场合成的一首八音盒小曲。</p>
+  <p class="chain">汉字 → 拼音（pinyin-pro）→ 假名 → AquesTalk → MP3 + 响度包络</p>
+
+  <h2>出片</h2>
+  <p>出片脚本开几个无界面浏览器，把全片切成几段。每个浏览器逐帧调用同一个 <code>renderAt(t)</code>，导出 JPEG，直接通过管道交给 ffmpeg，不落盘。几段编码完拼接，再混上离线渲染的声音。</p>
+  <p>79 秒的演示片，在一台 4 核的云端机器上渲染用了约 103 秒。想要 4K，加一个 <code>--scale 2</code>，建议放到自己的电脑上跑。</p>
+
+  <h2>开始</h2>
+<pre><code>git clone https://github.com/fish2lab/touhou-code-video-template
+cd touhou-code-video-template
+npm install &amp;&amp; npm run font
+open index.html          # 浏览器直接看
+npm run render           # 出片，需要 ffmpeg</code></pre>
+  <p>或者在 GitHub 上点 <b>Use this template</b>。然后读 <a href="https://github.com/fish2lab/touhou-code-video-template/blob/main/docs/%E6%95%99%E7%A8%8B.md">教程</a>：从「.mjs 是什么」讲到逐帧出片的原理；再读 <a href="https://github.com/fish2lab/touhou-code-video-template/blob/main/docs/%E7%BB%8F%E9%AA%8C.md">经验</a>：什么让一集耐看。</p>
+
+</main>
+
+<div class="wrap">
+  <footer>
+    <p>代码 MIT。字体霞鹜文楷（SIL OFL）。</p>
+    <p>配音由 AquesTalk（© 株式会社アクエスト）经 aquestalk.js 合成，仓库里只有合成出的声音。拼音到假名的表来自 yukumo-js（MIT）。</p>
+    <p>东方 Project 的角色版权归上海爱丽丝幻乐团（ZUN）。这是同人作品的工具，不是官方内容。</p>
+    <p><a href="https://github.com/fish2lab/touhou-code-video-template">github.com/fish2lab/touhou-code-video-template</a></p>
+  </footer>
+</div>
+
+</body>
+</html>

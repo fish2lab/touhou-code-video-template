@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>纯代码做一集东方视频（模板）</title>
+<style>
+@font-face { font-family: WenKai; src: url(fonts/LXGWWenKai-Regular.ttf); font-display: block; }
+html, body { margin: 0; background: #120d1f; color: #e9e0f5; font: 15px/1.4 WenKai, KaiTi, serif; }
+.stage { max-width: calc((100vh - 110px) * 16 / 9); margin: 0 auto; padding: 8px; background: #120d1f; }
+.stage:fullscreen { max-width: none; display: flex; flex-direction: column; justify-content: center; }
+canvas { display: block; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 6px; cursor: pointer; }
+#bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 2px; }
+#bar button { background: #2a2045; color: #f3e6f0; border: 1px solid #5a4b73; border-radius: 6px; padding: 4px 10px; font: inherit; cursor: pointer; }
+#bar button.on { background: #e9b949; color: #2b2140; border-color: #e9b949; }
+#track { position: relative; flex: 1; min-width: 160px; height: 10px; background: #2a2045; border-radius: 5px; cursor: pointer; }
+#fill { position: absolute; inset: 0 auto 0 0; background: #9d7fd6; border-radius: 5px; pointer-events: none; }
+#track i { position: absolute; top: -3px; width: 2px; height: 16px; background: #e9b949; pointer-events: none; }
+#chaps { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+body.bare { background: #000; } body.bare .stage { max-width: none; padding: 0; } body.bare #bar { display: none; } body.bare canvas { border-radius: 0; }
+</style>
+</head>
+<body>
+<div class="stage"><canvas id="c"></canvas><div id="bar"></div></div>
+<script>if (location.search.includes('bare')) document.body.classList.add('bare');</script>
+<!-- @scripts -->
+<script src="src/core.js"></script>
+<script src="src/voice-data.js"></script>
+<script src="src/kit.js"></script>
+<script src="src/character/patchouli.js"></script>
+<script src="src/character/cirno.js"></script>
+<script src="src/props.js"></script>
+<script src="src/scenes/0-opening.js"></script>
+<script src="src/scenes/1-time.js"></script>
+<script src="src/scenes/2-paper.js"></script>
+<script src="src/scenes/3-ending.js"></script>
+<script src="src/film.js"></script>
+<!-- @end -->
+</body>
+</html>

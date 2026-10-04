@@ -1,0 +1,60 @@
+# 唯一的一条 CI：构建单文件页面。
+#   推到 main → 部署 GitHub Pages（仓库 Settings → Pages 的 Source 要选 GitHub Actions）
+#   推 v* 标签，或提交信息里带 [release] → 另外逐帧渲染 1080p MP4，一起发到 Release
+#   （标签名取 package.json 的 version；由 CI 自己打标签，适合不能直接推标签的环境）
+name: build & publish
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE: ${{ startsWith(github.ref, 'refs/tags/') || contains(github.event.head_commit.message, '[release]') }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: pip install fonttools brotli
+      - run: npm ci
+      - run: node tools/build.mjs
+      - name: render mp4 (release only)
+        if: env.RELEASE == 'true'
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-noto-cjk
+          npx playwright install --with-deps chromium
+          node tools/render.mjs --jobs 4
+          cp dist/index.html touhou-code-video-template.html
+          echo "TAG=v$(node -p 'require("./package.json").version')" >> $GITHUB_ENV
+      - name: release (release only)
+        if: env.RELEASE == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || env.TAG }}
+          target_commitish: ${{ github.sha }}
+          name: 模板演示 ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || env.TAG }}
+          prerelease: true
+          body_path: docs/发布.md
+          files: |
+            touhou-code-video-template.html
+            out/touhou-code-video-template.mp4
+      - if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with: { path: dist }
+  pages:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: { name: github-pages, url: '${{ steps.deploy.outputs.page_url }}' }
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

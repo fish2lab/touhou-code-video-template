@@ -45,7 +45,7 @@ fx.html               亮点特效画廊：?fx=nap-fall&t=3.5 看某个特效的
 src/fx/               10 个从第 1–5 集提炼的独立特效模块（头注释写了出处、好在哪、复用、分叉），总览见 docs/亮点.html；挂进一集：index.html 加 _fx.js 和模块，fxScene / fxPlay 一行调用（见 _fx.js 头注释）
 tools/fxcheck.mjs     特效联系表：node tools/fxcheck.mjs <id> --n 12 → out/fx/<id>.jpg，页面有报错时退出码为 1
 src/props.js          共用站位和道具
-src/scenes/           每段一个文件（现在是四段演示）
+src/scenes/           每段一个文件（现在是五段演示）
 src/film.js           时间线、字幕、翻页转场
 tools/                抽帧、穿模检查、打包、配音、出片
 docs/                 教程、经验、各类文档模板

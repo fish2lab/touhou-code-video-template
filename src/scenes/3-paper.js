@@ -1,5 +1,5 @@
 'use strict';
-// 第 2 段：剪纸和手绘的抖（演示段）。同一个圆，左边是数学圆，右边是剪刀剪的纸；一根线「抖」是因为种子每秒换 8 次。
+// 第 3 段：剪纸和手绘的抖（演示段）。同一个圆，左边是数学圆，右边是剪刀剪的纸；一根线「抖」是因为种子每秒换 8 次。
 // 画具全在 src/kit.js：cutPaper 剪纸、rline 手绘线、zh 手写字、thread 线、popup 立体书、spin 转盘。
 const S2LINES = seq(.9, [
   ['画面的质感，来自两件小事。', { hold: .3 }],
@@ -29,4 +29,4 @@ function s2Draw(c, tau, L) {
   drawPatchouli(c, { ...STD.pch, pose: tau > S2T(1) ? 'lecture' : 'stand', mood: moodOf(L, 'patchouli', 'normal'), mouth: mouthOf(L, 'patchouli'), blink: blinkAt(tau), t: tau });
   drawCirno(c, { ...STD.cir, pose: tau > S2T(3) ? 'proud' : 'stand', mood: moodOf(L, 'cirno', 'normal'), mouth: mouthOf(L, 'cirno'), blink: blinkAt(tau, 2), t: tau });
 }
-scene({ order: 2, key: 'paper', title: '质感', dur: S2DUR, lines: S2LINES, fn: s2Draw });
+scene({ order: 3, key: 'paper', title: '质感', dur: S2DUR, lines: S2LINES, fn: s2Draw });

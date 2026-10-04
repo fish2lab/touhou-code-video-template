@@ -16,4 +16,4 @@ function s3Draw(c, tau, L) {
   drawPatchouli(c, { ...STD.pch, pose: 'lecture', mood: moodOf(L, 'patchouli', 'normal'), mouth: mouthOf(L, 'patchouli'), blink: blinkAt(tau), t: tau });
   drawCirno(c, { ...STD.cir, pose: 'stand', mood: 'happy', blink: blinkAt(tau, 2), t: tau });
 }
-scene({ order: 3, key: 'ending', title: '结尾', dur: S3DUR, lines: S3LINES, fn: s3Draw });
+scene({ order: 4, key: 'ending', title: '结尾', dur: S3DUR, lines: S3LINES, fn: s3Draw });

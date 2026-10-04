@@ -1,5 +1,5 @@
 'use strict';
-// 第 1 段：画面是时间的纯函数（演示段）。一弯月牙沿着时间轴走，位置只由 tau 决定。
+// 第 2 段：画面是时间的纯函数（演示段）。一弯月牙沿着时间轴走，位置只由 tau 决定。
 // 要点：不存状态、不用 Math.random()——想要「随机」用带种子的 hash/rng。这样才能随便跳到第 N 秒，也才能并行出片。
 const S1LINES = seq(.9, [
   ['这里的秘诀只有一条：每一帧，只由当前时间决定。', { hold: .5 }],
@@ -29,4 +29,4 @@ function s1Draw(c, tau, L) {
   drawPatchouli(c, { ...STD.pch, pose: tau > S1T(2) ? 'point' : 'lecture', mood: moodOf(L, 'patchouli', 'normal'), mouth: mouthOf(L, 'patchouli'), blink: blinkAt(tau), t: tau });
   drawCirno(c, { ...STD.cir, pose: tau > S1T(1) && tau < S1T(2) ? 'think' : 'stand', mood: moodOf(L, 'cirno', 'normal'), mouth: mouthOf(L, 'cirno'), blink: blinkAt(tau, 2), t: tau });
 }
-scene({ order: 1, key: 'time', title: '时间', dur: S1DUR, lines: S1LINES, fn: s1Draw });
+scene({ order: 2, key: 'time', title: '时间', dur: S1DUR, lines: S1LINES, fn: s1Draw });

@@ -62,7 +62,7 @@ footer p { margin-bottom: 10px; }
     <p class="lead">这是一个模板。整集科普视频没有一张外部图片，也没有 AI 生图：剪纸风的魔导书、六个角色、手写字、配音和背景音乐，每一笔都是 JavaScript 在 Canvas 上画的，最后逐帧渲染成 MP4。</p>
     <div class="links">
       <a href="https://github.com/fish2lab/touhou-code-video-template">源码</a>
-      <a href="film/">看完整演示片（79 秒，有声音）</a>
+      <a href="film/">看完整演示片（92 秒，有声音）</a>
       <a href="highlights/">十个可复用的特效</a>
     </div>
   </header>
@@ -155,7 +155,7 @@ fxPlay('pinwheel-tiles', c, tau, { box: [x, y, w, h], t0: 1.2, speed: 1.5 });</c
 
   <h2>出片</h2>
   <p>出片脚本开几个无界面浏览器，把全片切成几段。每个浏览器逐帧调用同一个 <code>renderAt(t)</code>，导出 JPEG，直接通过管道交给 ffmpeg，不落盘。几段编码完拼接，再混上离线渲染的声音。</p>
-  <p>79 秒的演示片，在一台 4 核的云端机器上渲染用了约 103 秒。想要 4K，加一个 <code>--scale 2</code>，建议放到自己的电脑上跑。</p>
+  <p>92 秒的演示片，在一台 4 核的云端机器上用 3 个并行页面渲染，用了约 135 秒。想要 4K，加一个 <code>--scale 2</code>，建议放到自己的电脑上跑。</p>
 
   <h2>开始</h2>
 <pre><code>git clone https://github.com/fish2lab/touhou-code-video-template

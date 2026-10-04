@@ -272,7 +272,7 @@ function rigFace(k) {
   // 嘴：一小片会变形的纸（S.mouth(type, open) → [轮廓, 颜色键, 舌头轮廓?]）
   const mo = rQ(mouth), [mp, mc, tongue] = rigMemo(S, ['m', md.mouth, mo].join('|'), () => { const [pts, col, tg] = S.mouth(md.mouth, mo); return [cut(pts, 95, 2.4, .15, false), col, tg ? cut(tg, 96, 2, .1) : null]; });
   const mm = rTR(head, turn * F.mouthTurn + (md.puff ? -2 : 0), F.mouthY);
-  low.push({ p: mp, m: mm, col: K[mc], edge: false });
+  low.push({ p: mp, m: mm, col: K[mc] || mc, edge: false });
   if (tongue) top.push({ p: tongue, m: mm, col: K.tongue, edge: false });
   // 虎牙：嘴角一颗白色小三角（mood.fang；位置在 face.fang）
   if (md.fang && F.fang) top.push({ p: rigMemo(S, 'fang', () => cut([[-2.2, 0], [2.2, 0], [0, 4.2]], 99, 2, .05, false)), m: rTR(mm, F.fang[0] + (md.mouth === 'smile' || md.mouth === 'laugh' ? -1.5 : 0), F.fang[1]), col: K.white, edge: false });

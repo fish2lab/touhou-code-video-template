@@ -1,6 +1,6 @@
 # 纯代码做一集东方视频（模板）
 
-一个能直接开工的模板：**没有外部美术资源，没有 AI 生图**，整集科普视频的每一笔都是 JavaScript 在 Canvas 上画的——剪纸风的魔导书舞台、五个剪纸角色（帕秋莉、琪露诺、八云蓝、红美铃、蕾米莉亚）、手写字、油库里配音、背景音乐，最后逐帧渲染成 1080p MP4。
+一个能直接开工的模板：**没有外部美术资源，没有 AI 生图**，整集科普视频的每一笔都是 JavaScript 在 Canvas 上画的——剪纸风的魔导书舞台、六个剪纸角色（帕秋莉、琪露诺、八云蓝、八云紫、红美铃、蕾米莉亚，统一身高）、手写字、油库里配音、背景音乐，最后逐帧渲染成 1080p MP4。
 
 出自「帕秋莉讲座」系列（[第 1 集](https://github.com/fish2lab/patchouli-lecture-1)、[第 2 集](https://github.com/fish2lab/patchouli-lecture-2)、[第 3 集](https://github.com/fish2lab/patchouli-lecture-3)）。本仓库把引擎、画具、角色和工具链抽出来，换成一段 80 秒的演示，讲的就是「这套东西怎么做」。
 
@@ -37,9 +37,10 @@ npm run render                           # 出片 → out/*.mp4
 index.html            页面骨架
 src/core.js           逐帧引擎、播放器、声音、台词排布
 src/kit.js            画具（剪纸、手绘线、手写字、魔导书舞台…）
-src/rig.js              剪纸人偶引擎（数据驱动，红美铃、蕾米莉亚用，说明见 docs/rig.md）
-src/character/        五个剪纸角色：帕秋莉、琪露诺、八云蓝、红美铃、蕾米莉亚
+src/rig.js              剪纸人偶引擎（数据驱动，红美铃、蕾米莉亚、八云蓝、八云紫用，说明见 docs/rig.md）
+src/character/        六个剪纸角色：帕秋莉、琪露诺、八云蓝、八云紫、红美铃、蕾米莉亚（八云紫文件里还有缝隙道具 drawYukariGap）
 character.html        角色样张页：?who=ran&sheet=poses 看姿势表，sheet=moods 看表情表
+tools/sheet.mjs       样张截图（没有图形界面时用）：node tools/sheet.mjs --who yukari → out/sheets/
 src/props.js          共用站位和道具
 src/scenes/           每段一个文件（现在是四段演示）
 src/film.js           时间线、字幕、翻页转场

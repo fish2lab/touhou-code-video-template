@@ -4,7 +4,7 @@
 //
 // drawRemilia(c, o) → { head:[x,y], hands:[[x,y],[x,y]], tip:[x,y], parasol:[x,y] | null }
 //   x, y     脚底中心；sit：坐着的那条线上臀部中心
-//   h        全身高（洋帽顶到脚底），默认 440（比琪露诺还矮一点，娇小）
+//   h        全身高（洋帽顶到脚底），默认 500（全员统一身高，见 docs/rig.md）
 //   facing   1 朝右 / -1 朝左（整张人偶镜像）
 //   pose     stand 双手背在身后、下巴微抬 | point 一手叉腰、一手指向前方（gesture 伸多远）| cross 双臂抱胸、脸侧开（傲气）
 //            sit 坐着、两腿垂下轻晃 | parasol 一手叉腰、一手把洋伞扛在肩后
@@ -183,7 +183,7 @@ const remArms = f => [
   { arms: f, items: [['cuff', 'u', 'red']], gr: false },
 ];
 const REM_RIG = {
-  name: 'remilia', h: 440, height: REM_TOP, K: REM_K, G: REM_G, cut: REM_CUT,
+  name: 'remilia', h: 500, height: REM_TOP, K: REM_K, G: REM_G, cut: REM_CUT,
   moods: REM_MOODS, moodAlias: REM_MOOD_ALIAS, poseAlias: REM_POSE_ALIAS, pose: remPose, mouth: remMouthPts,
   idleGesture: tt => .6 + .3 * Math.sin(tt * 1.2),
   headSway: [.015, 1, 1],

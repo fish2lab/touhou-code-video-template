@@ -3,7 +3,7 @@
 //
 // drawCirno(c, o) → { head:[x,y], hands:[[x,y],[x,y]], tip:[x,y], hold:[x,y] }
 //   x, y     脚底中心（fly：悬空时脚尖下方那一点，也就是她影子落的地方）
-//   h        全身高（头顶蝴蝶结顶到脚底），默认 460（比帕秋莉的 520 矮一点）。所有姿势共用这个比例
+//   h        全身高（头顶蝴蝶结顶到脚底），默认 500（全员统一身高，见 docs/rig.md）。所有姿势共用这个比例
 //   facing   1 朝右 / -1 朝左（整张人偶镜像）
 //   pose     stand 双手叉腰 | proud 一手叉腰、一手握拳举高（「我是最强的」，gesture 举多高）
 //            point 一手叉腰、一手伸向前方（gesture 伸多远）| hold 双手把一张纸举过头顶（hold 是纸的中心）
@@ -234,7 +234,7 @@ function cirPaint(c, items, sh, env, gr = true, al = 1) {
 const CIR_SH = { big: { blur: 5, sx: 2.4, sy: 3.4, al: .3 }, mid: { blur: 3.5, sx: 1.8, sy: 2.4, al: .3 }, tiny: { blur: 1.2, sx: .8, sy: 1, al: .3 }, wing: { blur: 4, sx: 2.6, sy: 3.6, al: .22 } };
 
 function drawCirno(c, o = {}) {
-  const { x = 0, y = 0, h = 460, facing = 1, tilt = 0, mouth = 0, blink = 0, t = 0 } = o;
+  const { x = 0, y = 0, h = 500, facing = 1, tilt = 0, mouth = 0, blink = 0, t = 0 } = o;
   const pose = CIR_POSE_ALIAS[o.pose] || o.pose || 'stand', moodName = CIR_MOOD_ALIAS[o.mood] || o.mood || 'normal';
   const md = CIR_MOODS[moodName] || CIR_MOODS.normal, tt = twos(t + CLOCK0), s = h / CIR_TOP;   // CLOCK0：全片时钟（core.js），交接处待机动作连续
   const g = o.gesture == null ? .6 + .3 * Math.sin(tt * 1.4) : clamp(o.gesture, 0, 1);

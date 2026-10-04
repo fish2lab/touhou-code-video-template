@@ -4,7 +4,7 @@
 // drawPatchouli(c, o) → { head:[x,y], hands:[[x,y],[x,y]], book:[x,y], tip:[x,y] }
 //   x, y     锚点。stand 等站姿：脚底中心；sit：坐着的那条线上臀部中心；peek：她扒着的那条边线的中点；
 //            lie：躺着贴地那条边的中点（facing=1 时头朝左）
-//   h        全身高（帽顶到脚底），默认 520。所有姿势共用这个比例（坐着、躺着时人偶大小不变）
+//   h        全身高（帽顶到脚底），默认 500（全员统一身高，见 docs/rig.md）。所有姿势共用这个比例（坐着、躺着时人偶大小不变）
 //   facing   1 朝右 / -1 朝左（整张人偶镜像，投影方向不变）
 //   pose     stand 双手抱书 | lecture 一臂抱书、另一只袖子比划（gesture 0..1 抬起程度，不传则缓慢起伏）
 //            point 手臂伸向前上方 | hide 书推上来挡住下半张脸 | cross 抱书双臂交叉、下巴抬起、脸侧开（傲娇）
@@ -222,9 +222,9 @@ function pchPaint(c, items, sh, env, gr = true) {
 const PCH_SH = { big: { blur: 5, sx: 2.4, sy: 3.4, al: .3 }, mid: { blur: 3.5, sx: 1.8, sy: 2.4, al: .3 }, tiny: { blur: 1.2, sx: .8, sy: 1, al: .3 } };
 
 function drawPatchouli(c, o = {}) {
-  const { x = 0, y = 0, h = 520, facing = 1, gesture = null, tilt = 0, mouth = 0, blink = 0, t = 0 } = o;
+  const { x = 0, y = 0, h = 500, facing = 1, gesture = null, tilt = 0, mouth = 0, blink = 0, t = 0 } = o;
   const pose = PCH_POSE_ALIAS[o.pose] || o.pose || 'stand', moodName = PCH_MOOD_ALIAS[o.mood] || o.mood || 'normal';
-  const md = PCH_MOODS[moodName] || PCH_MOODS.normal, tt = twos(t + CLOCK0), s = h / 520;
+  const md = PCH_MOODS[moodName] || PCH_MOODS.normal, tt = twos(t + CLOCK0), s = h / 520;   // 设计高 520，按 h 缩放
   const g = gesture === null ? .55 + .35 * Math.sin(tt * 1.3) : clamp(gesture, 0, 1);
   const ps = pchPose(pose, g, tt);
   // ---- 根：锚点 → 人偶设计坐标 ----

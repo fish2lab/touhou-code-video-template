@@ -4,7 +4,7 @@
 //
 // drawMeiling(c, o) → { head:[x,y], hands:[[x,y],[x,y]], tip:[x,y] }
 //   x, y     脚底中心（startle 跳起来时脚离地，x, y 仍是站立时的脚底）
-//   h        全身高（帽顶到脚底），默认 560（比帕秋莉高一点；头身比也比另外三位成熟）
+//   h        全身高（帽顶到脚底），默认 500（全员统一身高，见 docs/rig.md）
 //   facing   1 朝右 / -1 朝左（整张人偶镜像；帽徽上的「龙」字不跟着反）
 //   pose     stand 站岗：双手背在身后 | doze 站着打盹：抱臂、头垂下、身子随呼吸轻晃（t 驱动）
 //            startle 惊醒：gesture 0..1 是惊醒的进度（0 还在打盹 → .15 下蹲预备 → .15–.55 跳起、两手乱摆 → .55–.7 落地缓冲 → .8 以后两手在胸前直摆「没睡没睡」）
@@ -36,7 +36,7 @@ const MEI_K = (() => {
   };
 })();
 const MEI_CUT = rigCutter(4000);
-const MEI_NECK = -344, MEI_WAIST = -262, MEI_HIP = -236, MEI_HIPX = 13, MEI_L1 = 112, MEI_L2 = 106, MEI_FOOT = 18, MEI_HEAD = 1;
+const MEI_NECK = -344, MEI_WAIST = -262, MEI_HIP = -236, MEI_HIPX = 13, MEI_L1 = 112, MEI_L2 = 106, MEI_FOOT = 18, MEI_HEAD = 1.3;   // 头放大一点：和其他人一样偏少女的头身比（全员统一身高 500）
 
 // ===================== 部件（载入时剪好） =====================
 const MEI_G = (() => {
@@ -180,7 +180,7 @@ function meiRyu(k) {
   c.save(); c.transform(m[0], m[1], m[2], m[3], m[4], m[5]); zh(c, '龙', 0, 6, { size: 17, align: 'center', color: k.K.starInk, touch: 'meiling', qcRule: 'decor' }); c.restore();
 }
 const MEI_RIG = {
-  name: 'meiling', h: 560, height: MEI_TOP, K: MEI_K, G: MEI_G, cut: MEI_CUT,
+  name: 'meiling', h: 500, height: MEI_TOP, K: MEI_K, G: MEI_G, cut: MEI_CUT,
   moods: MEI_MOODS, moodAlias: MEI_MOOD_ALIAS, poseAlias: MEI_POSE_ALIAS, pose: meiPose, mouth: meiMouthPts,
   idleGesture: tt => .875 + .125 * Math.sin(tt * 1.2),
   headSway: [.015, 1, 1],

@@ -12,9 +12,9 @@ canvas { display: block; margin: 0 auto 16px; max-width: 100%; }
 </style>
 </head>
 <body>
-<!-- 开发用样张页：?who=patchouli|cirno|ran|meiling|remilia（默认全部），?sheet=poses|moods，?t=秒 固定时间（不传则动画播放） -->
+<!-- 开发用样张页：?who=patchouli|cirno|ran|meiling|remilia|yukari（默认全部），?sheet=poses|moods，?t=秒 固定时间（不传则动画播放） -->
 <div id="nav">
-  <a href="?who=patchouli">帕秋莉</a><a href="?who=cirno">琪露诺</a><a href="?who=ran">八云蓝</a><a href="?who=meiling">红美铃</a><a href="?who=remilia">蕾米莉亚</a><a href="?">全部</a>
+  <a href="?who=patchouli">帕秋莉</a><a href="?who=cirno">琪露诺</a><a href="?who=ran">八云蓝</a><a href="?who=meiling">红美铃</a><a href="?who=remilia">蕾米莉亚</a><a href="?who=yukari">八云紫</a><a href="?">全部</a>
 </div>
 <div id="wrap"></div>
 <script src="src/core.js"></script>
@@ -25,24 +25,28 @@ canvas { display: block; margin: 0 auto 16px; max-width: 100%; }
 <script src="src/character/ran.js"></script>
 <script src="src/character/meiling.js"></script>
 <script src="src/character/remilia.js"></script>
+<script src="src/character/yukari.js"></script>
 <script>
 // 每个角色：fn 画函数，poses 是 [姿势, 表情]，moods 是表情表，坐着/趴着的姿势在 lift 里给出抬高的像素，h 是并排时的全身高
 const CH = {
-  patchouli: { name: '帕秋莉', fn: drawPatchouli, h: 440, base: 600,
+  patchouli: { name: '帕秋莉', fn: drawPatchouli, h: 500, base: 600,
     poses: [['stand', 'normal'], ['lecture', 'normal'], ['point', 'smug'], ['hide', 'flustered'], ['cross', 'pout'], ['sit', 'smile'], ['peek', 'normal'], ['tired', 'sleepy']],
     lift: { sit: 100, peek: 160 }, moods: ['normal', 'smug', 'pout', 'flustered', 'annoyed', 'sleepy', 'surprised', 'smile'] },
-  cirno: { name: '琪露诺', fn: drawCirno, h: 440, base: 600,
+  cirno: { name: '琪露诺', fn: drawCirno, h: 500, base: 600,
     poses: [['stand', 'normal'], ['proud', 'proud'], ['point', 'normal'], ['hold', 'happy'], ['think', 'confused'], ['slump', 'cry'], ['fly', 'happy'], ['throw', 'pout']],
     lift: {}, moods: ['normal', 'proud', 'happy', 'surprised', 'confused', 'pout', 'cry'] },
-  ran: { name: '八云蓝', fn: drawRan, h: 560, base: 640,
+  ran: { name: '八云蓝', fn: drawRan, h: 500, base: 640,
     poses: [['stand', 'normal'], ['read', 'normal'], ['point', 'happy'], ['present', 'proud'], ['think', 'awkward'], ['bow', 'normal']],
     lift: {}, moods: ['normal', 'happy', 'surprised', 'awkward', 'proud'] },
   meiling: { name: '红美铃', fn: drawMeiling, h: 500, base: 600,
     poses: [['stand', 'normal'], ['doze', 'sleepy'], ['startle', 'flustered'], ['kungfu', 'smile']],
     lift: {}, moods: ['normal', 'sleepy', 'flustered', 'smile', 'surprised'] },
-  remilia: { name: '蕾米莉亚', fn: drawRemilia, h: 440, base: 600,
+  remilia: { name: '蕾米莉亚', fn: drawRemilia, h: 500, base: 600,
     poses: [['stand', 'normal'], ['point', 'smug'], ['cross', 'smug'], ['sit', 'smile'], ['parasol', 'normal'], ['slump', 'sleepy'], ['reach', 'annoyed']],
     lift: { sit: 100 }, moods: ['normal', 'smug', 'smile', 'pout', 'surprised', 'annoyed', 'flustered', 'sleepy', 'yawn'] },
+  yukari: { name: '八云紫', fn: drawYukari, h: 500, base: 600,
+    poses: [['stand', 'normal'], ['parasol', 'smug'], ['point', 'smile'], ['cross', 'normal'], ['sit', 'smile']],
+    lift: { sit: 100 }, moods: ['normal', 'smug', 'smile', 'surprised', 'annoyed', 'sleepy'] },
 };
 const chPaper = (c, w, h) => { c.fillStyle = P.paper; c.fillRect(0, 0, w, h); grain(c, polyPath(rectPts(0, 0, w, h)), .12); };
 function chPoses(who) { const S = CH[who], n = S.poses.length, W_ = Math.max(1800, n * 280), H_ = 760;

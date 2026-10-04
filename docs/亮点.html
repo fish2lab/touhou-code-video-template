@@ -30,7 +30,7 @@
 <p class="lead">从第 1–5 集里挑出 10 段最好看的动画，每段都重写成独立的模块，放在 <code>src/fx/&lt;id&gt;.js</code>。每个模块的 <code>draw(c, t)</code> 只依赖时间 <code>t</code>，没有隐藏状态，所以可以拖进度条、可以单帧截图，也可以整段搬进新一集。第 1–3 集的画风是基准；第 4 集的补觉段（<code>nap-fall</code>）是你点名最喜欢的，按原版的高反差还原。</p>
 
 <p><b>怎么看：</b>浏览器打开 <code>fx.html</code>，用 <code>?fx=&lt;id&gt;&amp;t=3.5</code> 跳到某个特效的某一秒；命令行跑 <code>node tools/fxcheck.mjs &lt;id&gt; --n 12</code>，在 <code>out/fx/&lt;id&gt;.jpg</code> 得到 12 帧联系表，页面有报错时退出码为 1。下面每张图就是这样出来的。</p>
-<p><b>怎么用：</b>在任意一段里写 <code>FX.list.find(o =&gt; o.id === 'nap-fall').draw(c, t)</code>。每个文件的头注释写了出处、好在哪、复用、分叉四项，配置都在文件顶部的 <code>FX_xxx</code> 常量里，全局变量统一加 <code>fx</code> 前缀，不会和段文件冲突。</p>
+<p><b>怎么用：</b>index.html 里加 <code>src/fx/_fx.js</code> 和要用的模块，然后整段放映写 <code>fxScene({ id: 'nap-fall', lines, over })</code>，或在自己的画面里当零件画 <code>fxPlay('nap-fall', c, tau, { box: [x, y, w, h], t0, speed })</code>（可缩进某一块区域、错开时间、调速、循环）。每个文件的头注释写了出处、好在哪、复用、分叉四项，配置都在文件顶部的 <code>FX_xxx</code> 常量里，全局变量统一加 <code>fx</code> 前缀，不会和段文件冲突。</p>
 
 <nav id="toc"></nav>
 
@@ -64,7 +64,7 @@
 const FX = [
  { id:'nap-fall', title:'倒地补觉：地裂、沉入海底、被钓回来', dur:10, src:'第 4 集 <code>4/src/scenes/4-nap.js</code>：裂缝 157-193 行，剪影 276-296 行，时间线 304-318 行，地层 119-131 行',
    why:'你最喜欢的一段。地面裂开像一道海峡，红美铃穿过 10 层从浅蓝到靛黑的地层往下沉，两侧是黑色锯齿岩壁，画面中心只有一个发光的白剪影，对比最强。再用一根钓线把她拉回地面，沙漏翻转重新计时。一个动作讲完「睡太久会掉进深睡」。',
-   reuse:'<code>FX.list.find(o=&gt;o.id===\'nap-fall\').draw(c,t)</code>。把角色换成别的 pose 即可，沙漏是独立道具。',
+   reuse:'<code>fxPlay(\'nap-fall\', c, tau)</code>，或 <code>fxScene({ id: \'nap-fall\' })</code> 整段放映。把角色换成别的 pose 即可，沙漏是独立道具。',
    fork:'<code>FX_NAP.strata</code> 的层数和层距决定下沉的速度感（层窄而多，才有往下冲的感觉）；沙漏换成别的计时物；把「睡」换成「被吸进去」「被淹没」等其他坠落类比喻。' },
  { id:'cyanotype-stars', title:'蓝晒星图：把散点连成星座', dur:10, src:'第 1 集 <code>1/src/scenes/4-focus.js:40-150</code>',
    why:'只有三种颜色：深蓝、纸白、一颗金星。40 颗星分布在椭球里并缓慢旋转，产生视差；46 条细线从金星出发逐条连出去。「专注 = 把零散的东西连成一张图」不用任何文字也看得懂。没有辉光。',

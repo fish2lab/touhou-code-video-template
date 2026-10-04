@@ -14,6 +14,7 @@ export async function openFilm(query = '', { html = resolve(ROOT, 'index.html'),
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto(pathToFileURL(html).href + '?bare' + (query ? '&' + query : ''));
   await page.waitForFunction(() => window.__ready === true, null, { timeout: 60000 });
-  const info = typeof __film === 'undefined' || wait !== '__ready' || !(await page.evaluate(() => window.__film)) ? null : await page.evaluate(() => ({ DUR: __film.DUR, FPS: __film.FPS, scenes: __film.scenes }));
+  // __film 是页面里的全局（Node 这边没有），所以要在页面里判断；样张页（fx.html）没有 __film，info 为 null
+  const info = await page.evaluate(() => window.__film ? { DUR: __film.DUR, FPS: __film.FPS, scenes: __film.scenes } : null);
   return { browser, page, errors, info };
 }

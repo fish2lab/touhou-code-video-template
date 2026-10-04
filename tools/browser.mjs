@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 export const ROOT = resolve(new URL('..', import.meta.url).pathname);
-export async function openFilm(query = '', { html = resolve(ROOT, 'index.html') } = {}) {
+export async function openFilm(query = '', { html = resolve(ROOT, 'index.html'), wait = '__ready' } = {}) {
   // 需要指定浏览器时设 CHROMIUM=可执行文件路径；否则用 Playwright 自带的
   const exe = process.env.CHROMIUM && existsSync(process.env.CHROMIUM) ? process.env.CHROMIUM : undefined;
   const browser = await chromium.launch({ executablePath: exe, args: ['--allow-file-access-from-files', '--autoplay-policy=no-user-gesture-required'] });
@@ -14,6 +14,6 @@ export async function openFilm(query = '', { html = resolve(ROOT, 'index.html') 
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto(pathToFileURL(html).href + '?bare' + (query ? '&' + query : ''));
   await page.waitForFunction(() => window.__ready === true, null, { timeout: 60000 });
-  const info = await page.evaluate(() => ({ DUR: __film.DUR, FPS: __film.FPS, scenes: __film.scenes }));
+  const info = typeof __film === 'undefined' || wait !== '__ready' || !(await page.evaluate(() => window.__film)) ? null : await page.evaluate(() => ({ DUR: __film.DUR, FPS: __film.FPS, scenes: __film.scenes }));
   return { browser, page, errors, info };
 }

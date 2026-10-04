@@ -41,6 +41,9 @@ src/rig.js              剪纸人偶引擎（数据驱动，红美铃、蕾米�
 src/character/        六个剪纸角色：帕秋莉、琪露诺、八云蓝、八云紫、红美铃、蕾米莉亚（八云紫文件里还有缝隙道具 drawYukariGap）
 character.html        角色样张页：?who=ran&sheet=poses 看姿势表，sheet=moods 看表情表
 tools/sheet.mjs       样张截图（没有图形界面时用）：node tools/sheet.mjs --who yukari → out/sheets/
+fx.html               亮点特效画廊：?fx=nap-fall&t=3.5 看某个特效的某一秒
+src/fx/               10 个从第 1–5 集提炼的独立特效模块（头注释写了出处、好在哪、复用、分叉），总览见 docs/亮点.html
+tools/fxcheck.mjs     特效联系表：node tools/fxcheck.mjs <id> --n 12 → out/fx/<id>.jpg，页面有报错时退出码为 1
 src/props.js          共用站位和道具
 src/scenes/           每段一个文件（现在是四段演示）
 src/film.js           时间线、字幕、翻页转场

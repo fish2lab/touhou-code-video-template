@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>第 1–5 集的 10 个亮点特效：好在哪、怎么复用、怎么改</title>
+<style>
+  :root { --paper:#f1e9d6; --ink:#3a2f36; --accent:#6b4f8a; --line:#d8cdb2; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.75 "LXGW WenKai","Songti SC",serif; }
+  main { max-width:1040px; margin:0 auto; padding:48px 24px 96px; }
+  h1 { font-size:30px; line-height:1.4; margin:0 0 12px; }
+  h2 { font-size:22px; margin:56px 0 12px; border-bottom:2px solid var(--line); padding-bottom:6px; }
+  h3 { font-size:18px; margin:0 0 4px; }
+  p, li { margin:6px 0; }
+  code { background:#e6dcc3; padding:1px 6px; border-radius:3px; font:13px/1.4 ui-monospace,Menlo,monospace; }
+  .lead { color:#5d4f57; }
+  nav { display:flex; flex-wrap:wrap; gap:8px 14px; margin:20px 0 0; }
+  nav a { color:var(--accent); text-decoration:none; border-bottom:1px dotted var(--accent); }
+  .fx { margin:28px 0; padding:20px; background:#f8f2e2; border:1px solid var(--line); border-radius:6px; }
+  .fx img { width:100%; display:block; border:1px solid var(--line); margin:12px 0; }
+  .meta { color:#7a6b73; font-size:14px; }
+  dl { margin:8px 0 0; display:grid; grid-template-columns:5em 1fr; gap:4px 12px; }
+  dt { color:var(--accent); font-weight:bold; }
+  dd { margin:0; }
+  .ban { border-left:4px solid #b4533c; padding:4px 14px; background:#f3e0d6; margin:16px 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>第 1–5 集的 10 个亮点特效：好在哪、怎么复用、怎么改</h1>
+<p class="lead">从第 1–5 集里挑出 10 段最好看的动画，每段都重写成独立的模块，放在 <code>src/fx/&lt;id&gt;.js</code>。每个模块的 <code>draw(c, t)</code> 只依赖时间 <code>t</code>，没有隐藏状态，所以可以拖进度条、可以单帧截图，也可以整段搬进新一集。第 1–3 集的画风是基准；第 4 集的补觉段（<code>nap-fall</code>）是你点名最喜欢的，按原版的高反差还原。</p>
+
+<p><b>怎么看：</b>浏览器打开 <code>fx.html</code>，用 <code>?fx=&lt;id&gt;&amp;t=3.5</code> 跳到某个特效的某一秒；命令行跑 <code>node tools/fxcheck.mjs &lt;id&gt; --n 12</code>，在 <code>out/fx/&lt;id&gt;.jpg</code> 得到 12 帧联系表，页面有报错时退出码为 1。下面每张图就是这样出来的。</p>
+<p><b>怎么用：</b>在任意一段里写 <code>FX.list.find(o =&gt; o.id === 'nap-fall').draw(c, t)</code>。每个文件的头注释写了出处、好在哪、复用、分叉四项，配置都在文件顶部的 <code>FX_xxx</code> 常量里，全局变量统一加 <code>fx</code> 前缀，不会和段文件冲突。</p>
+
+<nav id="toc"></nav>
+
+<h2 id="shoushu">先读这一节：手书感从哪里来</h2>
+<p>10 段特效共用同一套做法。看起来像一张张手剪的纸和手写的线，靠的是下面 8 条，缺一条就容易变成矢量动画。</p>
+<ol>
+  <li><b>纸有厚度。</b>每张纸的边缘多画一条 6–12 像素的深色侧边，叠起来就有立体感（冰块、地层、折叠的字条都是这样）。</li>
+  <li><b>影子只有一层、边缘是硬的。</b>影子是同一形状向右下偏移几十像素的纯色块，不模糊、不渐变。</li>
+  <li><b>剪口带手抖。</b>轮廓经过 <code>cutPaper</code> / <code>rline</code>，每个顶点随机偏移约 ±1.6 像素，种子固定，每帧抖得一样。</li>
+  <li><b>动作有预备、过冲、回稳。</b>弹出的纸先往下压一点，冲过目标位置，再弹回来，最后加一个「啪」字。</li>
+  <li><b>一个场景只用一个强调色。</b>蓝晒星图只有深蓝、纸白、一颗金星；折字游戏只有「霜」变紫。</li>
+  <li><b>段与段之间用形状接形状。</b>月亮变盘子，桌布线拉直成轨道（见 <code>handoffs</code>）。不用镜头推拉。</li>
+  <li><b>透视用仿射变换。</b>斜放的书、站起来的纸片都是 <code>setTransform</code> 的倾斜，不用 3D 引擎，所以边缘保持剪纸的平整。</li>
+  <li><b>尺寸有下限。</b>道具不小于画高的 15%，字不小于 48 像素（1080p），一个镜头里缩放不超过 2.5 倍。</li>
+</ol>
+<div class="ban">
+  <b>不要烘焙光影。</b>不画渐变光斑、体积光、柔和辉光、环境光遮蔽。第 4 集的吊灯光锥、柔光渐变是整集显得廉价的主要原因。要表达「亮」，用留白、一条白色高光线、或者「一张深色纸上挖一个圆洞」（见 <code>puppet-stage</code> 的聚光灯）。<code>nap-fall</code> 里的白剪影光晕是唯一的例外：它是第 4 集原版的招牌画面，用一层径向渐变加一圈暗角还原，限制在这一个模块里。
+</div>
+
+<h2 id="list">10 个特效</h2>
+<div id="list"></div>
+
+<h2 id="known">已知的小缺点</h2>
+<ul>
+  <li><code>fold-bits</code>：提示小字 60 像素，缩成联系表时偏小；翻起的半张纸用仿射近似，不是严格透视。</li>
+  <li><code>pinwheel-tiles</code>：左侧算式 52 像素，刚过下限；每块冰的裂纹是同样的两道。</li>
+</ul>
+</main>
+
+<script>
+const FX = [
+ { id:'nap-fall', title:'倒地补觉：地裂、沉入海底、被钓回来', dur:10, src:'第 4 集 <code>4/src/scenes/4-nap.js</code>：裂缝 157-193 行，剪影 276-296 行，时间线 304-318 行，地层 119-131 行',
+   why:'你最喜欢的一段。地面裂开像一道海峡，红美铃穿过 10 层从浅蓝到靛黑的地层往下沉，两侧是黑色锯齿岩壁，画面中心只有一个发光的白剪影，对比最强。再用一根钓线把她拉回地面，沙漏翻转重新计时。一个动作讲完「睡太久会掉进深睡」。',
+   reuse:'<code>FX.list.find(o=&gt;o.id===\'nap-fall\').draw(c,t)</code>。把角色换成别的 pose 即可，沙漏是独立道具。',
+   fork:'<code>FX_NAP.strata</code> 的层数和层距决定下沉的速度感（层窄而多，才有往下冲的感觉）；沙漏换成别的计时物；把「睡」换成「被吸进去」「被淹没」等其他坠落类比喻。' },
+ { id:'cyanotype-stars', title:'蓝晒星图：把散点连成星座', dur:10, src:'第 1 集 <code>1/src/scenes/4-focus.js:40-150</code>',
+   why:'只有三种颜色：深蓝、纸白、一颗金星。40 颗星分布在椭球里并缓慢旋转，产生视差；46 条细线从金星出发逐条连出去。「专注 = 把零散的东西连成一张图」不用任何文字也看得懂。没有辉光。',
+   reuse:'直接 <code>draw</code>；背景是一张不规则撕边的蓝纸，可以单独换底。',
+   fork:'<code>FX_CS.n</code> 星数，<code>fxCsEdges</code> 连线规则（改成按距离连、按顺序连），星形可换成别的小图标。适合讲「知识点之间的联系」。' },
+ { id:'line-coaster', title:'一条线站起来变成过山车轨道', dur:10, src:'第 1 集 <code>1/src/scenes/3-dopamine.js</code>',
+   why:'先用 2.2 秒把一条墨线写在纸上，再让它整体立起来变成透视轨道，帕秋莉坐的小车沿着轨道上下。低谷处填一块粉红色，带厚度边和一层硬影子。曲线本身就是内容，没有多余装饰。',
+   reuse:'<code>FX_LC.prof</code> 是曲线的高度函数，换一个函数就换一条曲线。',
+   fork:'小车 <code>FX_LC.car</code> 换成别的乘客；曲线换成多巴胺基线、学习曲线、遗忘曲线，粉红填充表示「亏损」或「负债」。' },
+ { id:'sky-dial', title:'24 小时半圆表盘 + 四层剪纸城市', dur:12, src:'第 1 集 <code>1/src/scenes/1-sleep.js</code>',
+   why:'上方半圆表盘（半径 360）转动，天空分 6 档纯色切换，不做渐变光。下面 4 层剪纸（远山、楼、树、地面）各自带厚边和硬影子，随时间做视差平移；窗户是挖空露出的亮纸。时间的流逝完全由颜色和位置表达。',
+   reuse:'<code>draw</code> 时间 <code>t</code> 映射到 0–24 点；表盘和城市可以拆开单独用。',
+   fork:'<code>FX_SKY.sky</code> 的 6 档颜色换成别的氛围，<code>FX_SKY.hour</code> 改起止时刻。适合讲作息、时差（第 4 集可用）。' },
+ { id:'popup-stand', title:'立体书：纸片啪地一下站起来', dur:9, src:'第 1 集 <code>1/src/scenes/5-exercise.js</code>',
+   why:'书页比例严格取 1:1.414，书脊居中，斜放。房子、树、帕秋莉三张纸片依次「预备下压 → 冲过头 → 回弹」站起来，每次配一个「啪」字和一条硬影子。立体感完全来自节奏和影子，没有 3D。',
+   reuse:'<code>FX_POP.pieces</code> 是纸片列表，每项带位置、尺寸、起立时刻。',
+   fork:'<code>FX_POP.spring</code> 调弹性参数；纸片换成任何实物（药盒、闹钟、哑铃），用来「展示一个新概念」。' },
+ { id:'puppet-stage', title:'纸剧场：聚光灯 + 提线的琪露诺', dur:10, src:'第 2 集 <code>2/src/scenes/2-pillars.js:228-380</code>',
+   why:'舞台先折起来，幕布拉开。聚光灯是一张深色纸挖一个圆洞，洞里照到哪个节点哪个节点亮，不用渐变。琪露诺被线牵着走，正好是「被提示词操控」的画面比喻。',
+   reuse:'<code>FX_PUP.net</code> 是舞台里的节点图，<code>FX_PUP.hole</code> 是聚光灯位置序列。',
+   fork:'节点图换成任何要「逐个点亮」的结构（流程、组织、神经网络）；提线人偶换成别的角色。' },
+ { id:'ice-slabs', title:'冰块落下、叠起、融进水桶', dur:10, src:'第 2 集 <code>2/src/scenes/3-consolidate.js:157-300, 527-540</code>',
+   why:'5 块半透明冰板依次落下，每块落地有压扁和涟漪，叠成一摞，再一块块化成水滴落进水桶。亮度只靠留白和几条白线，没有高光渐变。「巩固 = 层层积累，间隔久了会化掉」一目了然。',
+   reuse:'<code>FX_ICE.n</code> 控制冰块数量。',
+   fork:'水桶换成存钱罐，就是「积累」；去掉融化阶段，就是纯粹的叠层。' },
+ { id:'handoffs', title:'四种形状接形状的转场', dur:32, src:'<code>src/kit.js:362-376</code>（<code>handoffDisc / Thread / Sparks / Book</code>）',
+   why:'4 个 8 秒的转场：月亮变盘子，桌布线拉直成铁轨，火花变星点连成星座，星图变成书页。每个转场只用两个形状之间的变形，约 0.4 秒淡接，镜头不推拉，所以不会晕。',
+   reuse:'4 个函数分别独立，签名一致，直接塞在两段之间。',
+   fork:'想接新的两段，先找前一段的结尾形状和后一段的开头形状，写一个中间变形；不要用整屏淡入淡出。' },
+ { id:'fold-bits', title:'对折三次得到 3 比特，再看概率条', dur:12, src:'第 3 集 <code>3/src/scenes/2-bits.js:35-100</code> + <code>1-guess.js:101-113</code>',
+   why:'一张写了 8 个候选字的纸连续对折三次，纸堆越来越厚，旁边写「1 / 2 / 3 比特」。折完只剩「霜」，变成唯一的紫色。后半段 8 个字变成 8 根概率条：没有提示时几乎一样高，给出提示后「霜」涨到 78%。信息量的定义，一个动作加一组条形图讲完。',
+   reuse:'<code>FX_FOLD.cells</code> 候选字，<code>FX_FOLD.ans</code> 答案，<code>FX_FOLD.hints</code> 两次提示和对应的概率。',
+   fork:'换成 8 个选项（药名、日期、人名），或者折 4 次变成 16 选 1；条形图单独用也成立。' },
+ { id:'pinwheel-tiles', title:'冰块铺满风车格，数出 32 条边', dur:10, src:'第 5 集 <code>5/src/scenes/2-pinwheel.js</code> + <code>5/src/lake.js:16-110</code>',
+   why:'9×9 的蓝色格板上有 9 个洞，12 块冰先落中间 4 块、再落边上 8 块，每块落地时板子弹一下，被吃掉的洞边画出金线，左侧计数同步增长到 32。最后故意错放一块，亮出「冲突 3 格」。数学证明变成看得见的动作。',
+   reuse:'<code>FX_PIN</code> 里洞位、冰块位置、落下顺序都是数据。',
+   fork:'换洞位和冰块形状，就是别的覆盖问题；错位演示可单独拿去讲「反例」。' }
+];
+const toc = document.getElementById('toc'), list = document.getElementById('list');
+toc.innerHTML = '<a href="#shoushu">手书感</a>' + FX.map(f => `<a href="#${f.id}">${f.id}</a>`).join('') + '<a href="#known">已知缺点</a>';
+list.innerHTML = FX.map((f, i) => `
+<section class="fx" id="${f.id}">
+  <h3>${i + 1}. ${f.title}</h3>
+  <div class="meta"><code>${f.id}</code> · ${f.dur} 秒 · <a href="../fx.html?fx=${f.id}">在 fx.html 里打开</a></div>
+  <img src="fx/${f.id}.jpg" alt="${f.id} 联系表" loading="lazy">
+  <dl>
+    <dt>出处</dt><dd>${f.src}</dd>
+    <dt>好在哪</dt><dd>${f.why}</dd>
+    <dt>怎么复用</dt><dd>${f.reuse}</dd>
+    <dt>怎么改</dt><dd>${f.fork}</dd>
+  </dl>
+</section>`).join('');
+</script>
+</body>
+</html>

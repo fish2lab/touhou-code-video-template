@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>亮点特效样张</title>
+<style>
+@font-face { font-family: WenKai; src: url(fonts/LXGWWenKai-Regular.ttf); font-display: block; }
+html, body { margin: 0; background: #1b1714; color: #e8e0d0; font: 15px/1.5 WenKai, KaiTi, serif; }
+#nav { padding: 8px 16px; position: sticky; top: 0; background: #1b1714ee; z-index: 2 } #nav a { color: #c9b27a; margin-right: 14px; }
+canvas { display: block; margin: 8px auto; max-width: 100%; }
+#bar { text-align: center; padding: 4px; color: #a99; }
+</style>
+</head>
+<body>
+<!-- ?fx=<id> 播放某个特效（?t=秒 固定在某一刻；?bare 不显示导航）；不带参数列出全部 -->
+<div id="nav"></div><div id="bar"></div><canvas id="cv" width="1920" height="1080"></canvas>
+<script src="src/core.js"></script>
+<script src="src/kit.js"></script>
+<script src="src/rig.js"></script>
+<script src="src/character/patchouli.js"></script>
+<script src="src/character/cirno.js"></script>
+<script src="src/character/ran.js"></script>
+<script src="src/character/meiling.js"></script>
+<script src="src/character/remilia.js"></script>
+<script src="src/props.js"></script>
+<script src="src/fx/_fx.js"></script>
+<!-- @fx -->
+<script src="src/fx/nap-fall.js"></script>
+<script src="src/fx/line-coaster.js"></script>
+<script src="src/fx/cyanotype-stars.js"></script>
+<script src="src/fx/sky-dial.js"></script>
+<script src="src/fx/popup-stand.js"></script>
+<script src="src/fx/puppet-stage.js"></script>
+<script src="src/fx/ice-slabs.js"></script>
+<script src="src/fx/handoffs.js"></script>
+<script src="src/fx/fold-bits.js"></script>
+<script src="src/fx/pinwheel-tiles.js"></script>
+<!-- @end -->
+<script>
+const fxCv = document.getElementById('cv'), fxC = fxCv.getContext('2d'), fxId = Q.get('fx'), fxSel = FX.list.find(o => o.id === fxId);
+document.getElementById('nav').innerHTML = FX.list.map(o => `<a href="?fx=${o.id}">${o.title}</a>`).join('') || '（还没有特效）';
+if (Q.has('bare')) document.getElementById('nav').style.display = 'none';
+function fxStart() {
+  if (!fxSel) { document.getElementById('bar').textContent = '选一个特效'; fxCv.style.display = 'none'; window.__ready = true; return; }
+  document.getElementById('bar').textContent = `${fxSel.title} · ${fxSel.src} · ${fxSel.dur}s 循环`;
+  const fixed = Q.has('t') ? +Q.get('t') : null;
+  window.__fxAt = t => { FX.render(fxSel, fxC, t); return fxCv.toDataURL('image/png'); };
+  if (fixed !== null) { FX.render(fxSel, fxC, fixed); window.__ready = true; return; }
+  const t0 = performance.now(), loop = () => { FX.render(fxSel, fxC, ((performance.now() - t0) / 1000) % fxSel.dur); requestAnimationFrame(loop); }; loop(); window.__ready = true;
+}
+document.fonts.load(`40px ${ZH}`, '帕秋莉').then(() => document.fonts.ready).then(fxStart, fxStart);
+</script>
+</body>
+</html>

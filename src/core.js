@@ -202,7 +202,36 @@ async function mixdownWav(from, dur) {
   const L = buf.getChannelData(0), R = buf.getChannelData(1); let o = 44; for (let i = 0; i < n; i++) { dv.setInt16(o, clamp(L[i], -1, 1) * 32767, true); dv.setInt16(o + 2, clamp(R[i], -1, 1) * 32767, true); o += 4; }
   const u = new Uint8Array(dv.buffer); let bs = ''; for (let k = 0; k < u.length; k += 32768) bs += String.fromCharCode.apply(null, u.subarray(k, k + 32768)); return btoa(bs);
 }
+// score：背景音乐。有 src/bgm-data.js（tools/bgm.mjs 从东方原曲扒谱里取的音符）时，按下面的编配演奏：
+//   主旋律 = 八音盒（正弦 + 一点二倍频，敲下去后自己响完），副旋律同音色更轻，钢琴 = 过低通的三角波，低音 = 升高八度的正弦；整体放慢到 BGM.bpm，挂一点混响。
+//   一遍放完从头再来；全片最后 3 秒淡出。没有 BGM 数据时退回原来的八音盒小曲（scoreBox）。
+//   放慢后的速度写在 bgm-data.js 的 bpm 里（tools/bgm.mjs 的 BPM），原曲多在 140–160，八音盒放到 90 上下才不赶。
 function score(ac, out, t0, from = 0, dur = 300) {
+  if (typeof BGM === 'undefined') return scoreBox(ac, out, t0, from, dur);
+  const beat = 60 / (BGM.bpm || 92), loop = BGM.lenBeats * beat, end = from + dur, hz = n => 440 * Math.pow(2, (n - 69) / 12);
+  // 总线：干声 + 混响（脉冲响应用 rng 生成，确定性）
+  const master = ac.createGain(); master.connect(out);
+  const filmEnd = typeof FILM !== 'undefined' && FILM ? FILM.DUR : 1e9;
+  master.gain.setValueAtTime(1, t0); if (filmEnd < end + 3) { const fs = t0 + Math.max(0, filmEnd - 3 - from); master.gain.setValueAtTime(1, fs); master.gain.linearRampToValueAtTime(0, fs + 3); }
+  const rev = ac.createConvolver(), irLen = Math.floor(ac.sampleRate * 2.2), ir = ac.createBuffer(2, irLen, ac.sampleRate);
+  for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch), r = rng(5200 + ch); for (let i = 0; i < irLen; i++) d[i] = (r() * 2 - 1) * Math.pow(1 - i / irLen, 3.2); }
+  rev.buffer = ir; const wet = ac.createGain(); wet.gain.value = .22; rev.connect(wet); wet.connect(master);
+  const bus = (g, lp) => { const n = ac.createGain(); n.gain.value = g; let tail = n; if (lp) { const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = lp; n.connect(f); tail = f; } tail.connect(master); tail.connect(rev); return n; };
+  const B = { mel: bus(1), counter: bus(.5), piano: bus(1, 1700), bass: bus(1, 900) };
+  const note = (dst, f, t, ring, g, type = 'sine') => { if (t + ring < from || t >= end) return; const st = t0 + Math.max(0, t - from), off = Math.max(0, from - t);
+    const o = ac.createOscillator(), e = ac.createGain(); o.type = type; o.frequency.value = f; const g0 = g * Math.exp(-off * 3 / ring);
+    e.gain.setValueAtTime(0, st); e.gain.linearRampToValueAtTime(g0, st + .006); e.gain.exponentialRampToValueAtTime(.0004, st + Math.max(.06, ring - off));
+    o.connect(e); e.connect(dst); o.start(st); o.stop(st + Math.max(.06, ring - off) + .05); };
+  for (let L = Math.max(0, Math.floor((from - 3) / loop)); L * loop < end; L++) {
+    const base = L * loop;
+    for (const [b, d, n, v] of BGM.parts.mel) { const t = base + b * beat, ring = Math.max(1.1, d * beat + .5), g = .05 * (.55 + .45 * v);
+      note(B.mel, hz(n), t, ring, g); note(B.mel, hz(n) * 2.003, t, ring * .55, g * .22); }
+    for (const [b, d, n, v] of BGM.parts.counter) { const t = base + b * beat; note(B.counter, hz(n), t, Math.max(.9, d * beat + .4), .045 * (.55 + .45 * v)); }
+    for (const [b, d, n, v] of BGM.parts.piano) { const t = base + b * beat; note(B.piano, hz(n), t, Math.min(1.8, d * beat + .25), .018 * (.5 + .5 * v), 'triangle'); }
+    for (const [b, d, n, v] of BGM.parts.bass) { const t = base + b * beat; note(B.bass, hz(n + 12), t, Math.max(.15, d * beat * .9), .04 * (.5 + .5 * v)); }
+  }
+}
+function scoreBox(ac, out, t0, from = 0, dur = 300) {
   const BPM = 84, beat = 60 / BPM, bar = beat * 4;
   const scale = [0, 2, 4, 7, 9, 12, 14, 16], base = 392;   // G 五声
   const hz = n => base * Math.pow(2, n / 12);

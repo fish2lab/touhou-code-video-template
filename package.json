@@ -2,7 +2,7 @@
   "name": "touhou-code-video-template",
   "private": true,
   "version": "0.1.0",
-  "description": "纯代码做一集东方科普视频：Canvas 2D 剪纸风逐帧引擎 + 两个剪纸角色 + 油库里语音 + 出片工具链（模板仓库）",
+  "description": "纯代码做一集东方科普视频：Canvas 2D 剪纸风逐帧引擎 + 七个剪纸角色 + 油库里语音 + 角色曲 BGM + 出片工具链（模板仓库）",
   "scripts": {
     "font": "node tools/fetch-font.mjs",
     "dev": "node tools/frames.mjs --grid 24",
@@ -10,9 +10,11 @@
     "overlap": "node tools/overlap.mjs",
     "build": "node tools/build.mjs",
     "voice": "node tools/voice.mjs",
-    "render": "node tools/render.mjs"
+    "render": "node tools/render.mjs",
+    "bgm": "node tools/bgm.mjs"
   },
   "devDependencies": {
+    "@tonejs/midi": "^2.0.28",
     "aquestalk.js": "^1.0.7",
     "pinyin-pro": "^3.29.4",
     "playwright": "1.56.1"

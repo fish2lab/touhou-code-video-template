@@ -2,7 +2,7 @@
 
 ## 这个仓库做什么
 
-「纯代码做一集东方科普视频」的模板：Canvas 2D 剪纸风逐帧引擎 + 六个剪纸角色（帕秋莉、琪露诺、八云蓝、八云紫、红美铃、蕾米莉亚，**全员统一身高 500、偏少女头身比**；rig.js 是后四位共用的人偶引擎，样张页 character.html，无图形界面时用 `node tools/sheet.mjs --who 名字` 截图）+ 油库里语音 + 出片工具链。没有外部美术资源，没有 AI 生图，每一笔都是 JavaScript 画的。`src/scenes/` 里现在是五段演示，新开一集就是把它们换成自己的内容。教程见 `docs/教程.md`。
+「纯代码做一集东方科普视频」的模板：Canvas 2D 剪纸风逐帧引擎 + 七个剪纸角色（帕秋莉、琪露诺、八云蓝、八云紫、红美铃、蕾米莉亚、古明地觉，**全员统一身高 500、偏少女头身比**；rig.js 是后五位共用的人偶引擎，样张页 character.html，无图形界面时用 `node tools/sheet.mjs --who 名字` 截图）+ 油库里语音 + 角色曲改编的 BGM + 出片工具链。没有外部美术资源，没有 AI 生图，每一笔都是 JavaScript 画的。`src/scenes/` 里现在是五段演示，新开一集就是把它们换成自己的内容。教程见 `docs/教程.md`。
 
 ## 开新一集
 
@@ -11,6 +11,7 @@
 3. 主会话先做一个样板段，把这一集的视觉隐喻和节奏定死；再按文件拆包并行（每段一个文件、一个 git worktree）。
 4. 每段写完：`node tools/overlap.mjs --scene 段名` → `node tools/frames.mjs --scene 段名 --grid 24` → 看图。
 5. 改了台词：`npm run voice`（要提交生成的 `src/voice-data.js`）。出片：`npm run render`。
+6. BGM：换成这一集主讲角色（或首次登场角色）的角色曲，`npm run bgm -- 扒谱.mid`（要提交生成的 `src/bgm-data.js`），步骤见 `docs/教程.md`「背景音乐」。
 
 ## 规则（沿用这个系列的做法）
 
@@ -23,4 +24,5 @@
 - 角色全部纯代码绘制，不引入参考图；参考图不进仓库、不进构建产物。
 - 知识类内容标出处；不写医疗诊断和药物剂量建议。
 - **用亮点特效**：`src/fx/` 里 10 个现成的特效（总览 `docs/亮点.html`，样张 `fx.html?fx=<id>`）。index.html 加 `src/fx/_fx.js` 和要用的模块，整段放映 `fxScene({ id, lines, over })`，当零件画 `fxPlay(id, c, tau, { box, t0, speed })`。用法详见 `src/fx/_fx.js` 头注释。
+- **BGM 一律用相关角色的角色曲**：取扒谱的音符，用 `core.js` 的 `score()` 编配成八音盒版，不放原曲录音，不用无关的曲子。MIDI 不进仓库，发布文案写明原曲和扒谱出处。
 - **提交即推送**：`git commit` 之后默认接着 `git push` 到当前分支（通常是 main），不再单独问。推送前确认没有 `/Users/`、会话 ID、私人材料；要改写历史的操作（`--force`、`rebase` 已推送的提交）仍先问。

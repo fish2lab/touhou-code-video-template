@@ -54,6 +54,10 @@ function marAlong(pts) {
   const T = L[L.length - 1];
   return u => { const d = clamp(u, 0, 1) * T; let i = 1; while (i < L.length - 1 && L[i] < d) i++; const f = (d - L[i - 1]) / ((L[i] - L[i - 1]) || 1); return [lerp(pts[i - 1][0], pts[i][0], f), lerp(pts[i - 1][1], pts[i][1], f)]; };
 }
+// 两点之间的二次弧：bend 往前进方向左手边鼓多少；marHooks 一串弯尖 [尖, 谷, 弯]，两条边往同一侧弯，尖像小钩
+function marArc(a, b, bend, n = 5) { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, cx = (a[0] + b[0]) / 2 - dy / l * bend, cy = (a[1] + b[1]) / 2 + dx / l * bend;
+  return Array.from({ length: n }, (_, k) => { const t = (k + 1) / n, u = 1 - t; return [u * u * a[0] + 2 * u * t * cx + t * t * b[0], u * u * a[1] + 2 * u * t * cy + t * t * b[1]]; }); }
+function marHooks(start, list) { const out = [start]; let p = start; for (const [t, v, bend] of list) { out.push(...marArc(p, t, bend), ...marArc(t, v, -bend * .7)); p = v; } return out; }
 // 帽子（头坐标）：帽檐半宽 R（约 1.9 倍脸宽），前沿 marBrimF 是一道中间最低的下鼓弧，两端再往下耷拉、尖端略往外翻；后沿 marBrimT 是扁弧
 // 整顶帽子按 tilt 歪一点（y += tilt·x）；帽身下沿是一道半径 MAR_CROWN 的前弧，两端正好落在帽檐后沿上
 const MAR_BRIM = { y: -122, R: 122, front: 28, back: 22, droop: 20, wave: 2.2, flip: 7, tilt: -.04 }, MAR_CROWN = { y: -139, rx: 72, ry: 15, h: 80 };
@@ -124,32 +128,41 @@ const MAR_G = (() => {
   // ---- 头（头坐标：脖子关节为原点；下巴 (0,-4)，头顶 -150） ----
   // 圆脸：两颊鼓、下巴小（和帕秋莉同一张脸型，全员统一）
   g.face = cut([[0, -4], [13, -6], [29, -13], [45, -27], [57, -46], [63, -70], [64, -98], [59, -124], [42, -142], [0, -150], [-42, -142], [-59, -124], [-64, -98], [-63, -70], [-57, -46], [-45, -27], [-29, -13], [-13, -6]], 120, 7, .5);
-  // 后发：从帽下披到腰下的金色长发，略卷，两边一起一伏，发梢往外翘成几绺
-  const wv = (y, k) => 5 * Math.sin(y * .055 + k);
-  const sY = [-136, -118, -92, -60, -28, 4, 36, 64, 88], sX = [60, 72, 80, 82, 83, 86, 89, 92, 94];
-  const sideR = sY.map((y, i) => [sX[i] + (i ? wv(y, 1) : 0), y]), sideL = sY.map((y, i) => [-(sX[i] + (i ? wv(y, 4) : 0)), y]);
-  const tipsR = [[100, 110], [84, 98], [76, 118], [62, 100], [48, 116], [34, 100], [18, 112], [0, 100]], tipsL = [[-16, 112], [-32, 99], [-46, 117], [-60, 100], [-74, 118], [-84, 98], [-100, 108]];
-  g.backHair = cut([[0, -160], [36, -156], ...rOpen(sideR, 5), ...tipsR, ...tipsL, ...rOpen(sideL, 5).reverse(), [-36, -156]], 121, 9, .8, false);
+  // 后发：从帽下蓬出来、披到腰下的金色长发；外轮廓一起一伏，下面分成几束带弯尖的发梢
+  const backR = [[40, -150], [64, -138], [82, -122], [91, -104], [93, -78], [88, -52], [93, -24], [89, 4], [95, 32], [92, 60], [99, 86]];
+  const backL = [[-40, -150], [-64, -138], [-83, -122], [-92, -102], [-92, -74], [-88, -46], [-94, -18], [-90, 10], [-96, 38], [-92, 62], [-99, 86]];
+  const backTips = marHooks([99, 86], [[[106, 118], [88, 100], 4], [[82, 126], [68, 104], 3], [[58, 122], [44, 106], 3], [[30, 118], [14, 104], 2], [[0, 116], [-14, 104], -2],
+    [[-30, 120], [-46, 104], -3], [[-60, 124], [-72, 102], -3], [[-84, 126], [-90, 98], -4], [[-106, 116], [-99, 86], -3]]);
+  g.backHair = cut([[0, -152], ...rOpen(backR, 5), ...backTips, ...rOpen(backL, 5).reverse()], 121, 9, .8, false);
   g.hairStrands = [-58, -30, 0, 30, 58].map((x0, i) => { const pts = []; for (let y = -40; y <= 96; y += 12) pts.push([x0 + 4 * Math.sin(y * .07 + i * 1.7) + y * .08 * Math.sign(x0 || 1), y]); return cut(rStroke(rOpen(pts, 4), u => 2.4 - 1.5 * u), 122 + i, 6, .2, false); });
-  // 左鬓发（屏幕左、sd = -1）：从帽檐下垂到胸口的略卷长发绺，发梢两三个尖
-  const lockR = [...rOpen([[50, -128], [65, -118], [73, -86], [76, -50], [72, -16], [77, 14], [73, 38]], 4), [76, 56], [67, 46], [63, 62], [59, 40],
-    ...rOpen([[61, 14], [57, -16], [61, -50], [57, -84], [47, -112]], 4)];
+  // 两侧鬓发的根：从帽檐下沿往外蓬（外沿 ±84，约脸宽的 1.3 倍），像被帽子压住后鼓出来
+  const puffO = [[48, -134], [70, -126], [82, -110], [85, -92]];
+  // 左鬓发（屏幕左、sd = -1）：贴着脸颊垂到胸口的一绺波浪侧发，末端分成三个弯尖
+  const lockO = rOpen([...puffO, [80, -70], [71, -50], [68, -30], [76, -8], [70, 16], [74, 38]], 4);
+  const lockI = rOpen([[46, -122], [57, -106], [60, -84], [56, -62], [50, -42], [49, -22], [55, 0], [54, 24]], 4).reverse();
+  const lockTips = marHooks([74, 38], [[[73, 64], [65, 44], -4], [[62, 60], [58, 42], -3], [[52, 54], [54, 24], -2]]);
+  const lockR = [...lockO, ...lockTips.slice(1), ...lockI];
   g.lockL = cut(rMirror(lockR), 140, 6, .5, false);
-  // 右鬓发（sd = +1）编成一条小辫：根部一绺从帽檐下出来，往下一节一节的辫子，胸口高度系白蝴蝶结，下面再垂一小撮发尾
-  g.braidRoot = cut([...rOpen([[48, -128], [65, -118], [73, -96]], 4), [72, -80], [60, -78], ...rOpen([[56, -96], [46, -114]], 4)], 141, 5, .4, false);
-  // 每一节是一片斜着的叶形发束，左右交替、一节压一节（三股辫的样子）
-  const bp = marAlong(spline([[66, -84], [70, -56], [72, -28], [71, 0], [69, 24], [67, 42]], 4, false)), NB = 9;
-  g.braid = Array.from({ length: NB }, (_, i) => { const [bx, by] = bp(i / (NB - 1)), sd = i % 2 ? 1 : -1, w = 7.4 - i * .25, h = 11.5 - i * .3, a = sd * .62;
-    const leaf = []; for (let k = 0; k < 14; k++) { const t = k / 14 * TAU, x = w * Math.sin(t) * (1 - .25 * Math.cos(t)), y = -h * Math.cos(t); leaf.push([bx + sd * 2.6 + x * Math.cos(a) - y * Math.sin(a), by + 1 + x * Math.sin(a) + y * Math.cos(a)]); }
-    return cut(leaf, 142 + i, 4, .3); });
-  g.braidLines = Array.from({ length: NB - 1 }, (_, i) => { const [bx, by] = bp((i + .5) / (NB - 1)), sd = i % 2 ? -1 : 1;
-    return cut(rStroke([[bx - 6 * sd, by - 3], [bx + 5 * sd, by + 2.5]], 1.4), 152 + i, 3, .1, false); });
-  g.braidTuft = cut([[-6, -2], [5, -2], [9, 10], [7, 26], [3, 17], [0, 30], [-3, 17], [-8, 24], [-8, 9]], 160, 4, .3, false);
-  g.braidBow = cut(RIG_SHAPES.bow.map(([x, y]) => [x * 1.05, y * 1.05]), 161, 3, .2, false);
-  g.braidKnot = cut(ellPts(0, 0, 2.8, 3.2, 8), 162, 2, .1, false);
-  // 刘海：盖住额头、略乱的一排尖，下缘刚好压到眼睛上沿；顶部藏在帽檐下（上沿 -140 在帽檐椭圆里面）
-  g.bangs = cut([[-66, -140], [66, -140], [67, -108], [63, -80], [56, -96], [49, -72], [39, -92], [29, -74], [18, -95], [9, -76], [1, -98], [-6, -78], [-15, -96], [-25, -72], [-35, -93], [-46, -73], [-55, -96], [-63, -80], [-67, -108]], 165, 6, .5, false);
-  g.bangLines = [[29, -74, 32, -122], [9, -76, 6, -124], [-25, -72, -28, -122], [49, -72, 54, -116], [-46, -73, -52, -114]].map(([x0, y0, x1, y1], i) => cut([[x0 - .9, y0], [x1 - 1.7, y1], [x1 + 1.7, y1], [x0 + .9, y0]], 166 + i, 8, .2, false));
+  g.lockLines = [[[67, -84], [62, -56], [58, -34], [64, -8], [62, 18], [64, 46]], [[76, -96], [72, -66], [64, -44], [62, -26]]].map((pts, i) =>
+    cut(rMirror(rStroke(rOpen(pts, 4), u => 1.8 - 1.2 * u)), 230 + i, 6, .15, false));
+  // 右鬓发（sd = +1）编成一条细麻花辫：根部从帽檐下蓬出来再收进辫子，辫子贴着脸颊外缘垂到胸口，系小白蝴蝶结，下面散一小撮发尾
+  g.braidRoot = cut([...rOpen([...puffO, [82, -80], [74, -68], [66, -62]], 4), [60, -64], ...rOpen([[56, -72], [60, -90], [57, -108], [46, -122]], 4)], 141, 5, .4, false);
+  const bpts = spline([[66, -70], [62, -50], [57, -30], [53, -10], [51, 10], [51, 28], [52, 44]], 4, false), bp = marAlong(bpts), NB = 7;
+  g.braidBack = cut(rStroke(bpts, u => 10 - 2.5 * u), 232, 5, .2, false);
+  // 每一节是一瓣斜着的小弧形发束，左右交替、下一节压上一节（三股辫的样子）
+  g.braid = Array.from({ length: NB }, (_, i) => { const [bx, by] = bp((i + .5) / NB), sd = i % 2 ? 1 : -1, w = 6 - i * .2, h = 11 - i * .3, a = sd * .5;
+    const leaf = []; for (let k = 0; k < 14; k++) { const t = k / 14 * TAU, x = w * Math.sin(t) * (1 - .3 * Math.cos(t)), y = -h * Math.cos(t); leaf.push([bx + sd * 1.6 + x * Math.cos(a) - y * Math.sin(a), by + x * Math.sin(a) + y * Math.cos(a)]); }
+    return cut(leaf, 142 + i, 4, .25); });
+  g.braidLines = Array.from({ length: NB - 1 }, (_, i) => { const [bx, by] = bp((i + 1) / NB), sd = i % 2 ? -1 : 1;
+    return cut(rStroke(rOpen([[bx - 4.5 * sd, by - 3], [bx + .5 * sd, by + .5], [bx + 4 * sd, by + 3.5]], 2), 1.2), 152 + i, 3, .1, false); });
+  g.braidTuft = cut([[-4.5, -2], [4.5, -2], [7, 8], [9, 19], [5, 14], [2, 23], [-1, 13], [-5, 20], [-6, 8]], 160, 4, .3, false);
+  g.braidBow = cut(RIG_SHAPES.bow.map(([x, y]) => [x * .85, y * .85]), 161, 3, .2, false);
+  g.braidKnot = cut(ellPts(0, 0, 2.4, 2.8, 8), 162, 2, .1, false);
+  // 刘海：从帽檐下出来几缕长短不一的弯尖（眼睛上面的短，眉心和两鬓的长），下缘大致压到眼睛上沿；顶部藏在帽檐下
+  const bangSet = [[[72, -64], [62, -96], 4], [[54, -72], [46, -95], 3], [[37, -78], [29, -96], 3], [[21, -75], [12, -97], 2], [[3, -64], [-8, -95], -3],
+    [[-20, -76], [-28, -97], -2], [[-36, -79], [-45, -95], -3], [[-54, -70], [-62, -97], -3], [[-72, -64], [-74, -104], -4]];
+  g.bangs = cut([[-68, -140], [68, -140], ...marHooks([74, -104], bangSet)], 165, 6, .5, false);
+  g.bangLines = bangSet.filter((_, i) => i % 2 === 0).map(([[tx, ty]], i) => cut(rStroke([[tx * .97, ty - 5], [tx * 1.02, -100], [tx * 1.05, -124]], u => 1.8 * (1 - u) + .5), 166 + i, 8, .2, false));
   // ---- 魔女帽（头坐标）----
   // 帽檐：整片（里衬在下、黑面在上，里衬只在前沿和两端下面露一条跟着弧走的细边），帽身罩在它上面，前沿一条（同样两层）再压到帽身下沿前面
   const BR = MAR_BRIM, CR = MAR_CROWN, NX = 40;
@@ -305,7 +318,7 @@ const MAR_RIG = {
     { name: 'hairB', parent: 'head', rot: k => -k.hr * .85 + k.wind * (.14 + .03 * Math.sin(k.tt * 4)), sway: [.008, 1.1, .5], spring: { len: 200, gain: .5, f: 1.5, max: .12 } },
     { name: 'lockL', parent: 'head', pivot: [-58, -110], rot: k => -k.hr * .55 + k.wind * .12, sway: [.02, 1.5, -1], spring: { len: 150, gain: .6, f: 2, max: .25 } },
     { name: 'braid', parent: 'head', pivot: [60, -110], rot: k => -k.hr * .55 + k.wind * .16, sway: [.025, 1.4, 1], spring: { len: 150, gain: .6, f: 2, max: .25 } },
-    { name: 'braidEnd', parent: 'braid', at: [67, 50], rot: k => .1 + .06 * Math.sin(k.tt * 2.3) + k.wind * .2 },
+    { name: 'braidEnd', parent: 'braid', at: [52, 44], rot: k => .1 + .06 * Math.sin(k.tt * 2.3) + k.wind * .2 },
     { name: 'bangs', parent: 'head', at: k => [k.turn * 5, 0] },
     // 帽子：grin 时绕帽檐中心往前侧压低（tug）
     { name: 'cap', parent: 'head', at: k => [k.turn * 4, 0], pivot: [0, MAR_BRIM.y], rot: k => (k.ps.tug || 0) + k.wind * -.06 },
@@ -353,6 +366,8 @@ const MAR_RIG = {
     { items: [['face', 'head', 'skin']], sh: 'mid' },
     { call: 'face' },
     { items: [['lockL', 'lockL', 'hair'], ['braidRoot', 'braid', 'hair']], sh: 'mid' },
+    { items: [['lockLines', 'lockL', 'hairLine', false]], gr: false, al: .7 },
+    { items: [['braidBack', 'braid', 'hairBack']], sh: 'tiny', gr: false },
     { items: [['braid', 'braid', 'hair']], sh: 'tiny' },
     { items: [['braidLines', 'braid', 'hairLine', false]], gr: false },
     { items: [['braidTuft', 'braidEnd', 'hair']], sh: 'tiny' },

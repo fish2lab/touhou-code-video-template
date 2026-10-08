@@ -283,7 +283,7 @@ const MAR_RIG = {
   headSway: [.016, .9, 1],
   // 五官（头坐标，和帕秋莉同一套：眼睛 (±28,-54)、rx 13 ry 16，乘 1.2 后落到规格的位置）
   face: { style: 'layered', ex: 28, ey: -54, far: .28, turnX: 12, rx: 13, ry: 16, lookX: 3.4, mouthY: -24, mouthTurn: 13,
-    blush: { dx: 14, turn: 1, y: -30, bump: 1, rx: 10, ry: 5, hatch: true }, brow: { x: 28, y: -86, len: 8.5, seed: 198, th: [1.6, 1.4, .2, 1.1, 1.6] } },
+    blush: { dx: 14, turn: 1, y: -30, bump: 1, rx: 10, ry: 5, hatch: true }, brow: { x: 28, y: -80, len: 8.5, seed: 198, th: [1.6, 1.4, .2, 1.1, 1.6] } },
   arm: { parent: 'ug', shoulder: MAR_SH, upper: MAR_ARM, fore: MAR_ARM, mirrorHand: true, tips: RIG_SHAPES.handTip,
     hands: { open: 'handOpen', fist: 'handFist', point: 'handPoint', grip: 'handGrip' } },
   // 待机：站得稳，只轻晃、呼吸；骑扫帚时整个人上下浮动；头发、帽尖、辫子有弹簧

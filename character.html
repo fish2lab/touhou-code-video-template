@@ -13,9 +13,9 @@ canvas { display: block; margin: 0 auto 16px; max-width: 100%; }
 </style>
 </head>
 <body>
-<!-- 开发用样张页：?who=patchouli|cirno|ran|meiling|remilia|yukari|satori（默认全部），?sheet=poses|moods，?t=秒 固定时间（不传则动画播放） -->
+<!-- 开发用样张页：?who=patchouli|cirno|ran|meiling|remilia|yukari|satori|reimu（默认全部），?sheet=poses|moods，?t=秒 固定时间（不传则动画播放） -->
 <div id="nav">
-  <a href="?who=patchouli">帕秋莉</a><a href="?who=cirno">琪露诺</a><a href="?who=ran">八云蓝</a><a href="?who=meiling">红美铃</a><a href="?who=remilia">蕾米莉亚</a><a href="?who=yukari">八云紫</a><a href="?who=satori">古明地觉</a><a href="?">全部</a>
+  <a href="?who=patchouli">帕秋莉</a><a href="?who=cirno">琪露诺</a><a href="?who=ran">八云蓝</a><a href="?who=meiling">红美铃</a><a href="?who=remilia">蕾米莉亚</a><a href="?who=yukari">八云紫</a><a href="?who=satori">古明地觉</a><a href="?who=reimu">博丽灵梦</a><a href="?">全部</a>
 </div>
 <div id="wrap"></div>
 <script src="src/core.js"></script>
@@ -28,6 +28,7 @@ canvas { display: block; margin: 0 auto 16px; max-width: 100%; }
 <script src="src/character/remilia.js"></script>
 <script src="src/character/yukari.js"></script>
 <script src="src/character/satori.js"></script>
+<script src="src/character/reimu.js"></script>
 <script>
 // 每个角色：fn 画函数，poses 是 [姿势, 表情]，moods 是表情表，坐着/趴着的姿势在 lift 里给出抬高的像素，h 是并排时的全身高
 const CH = {
@@ -52,6 +53,9 @@ const CH = {
   satori: { name: '古明地觉', fn: drawSatori, h: 500, base: 600,
     poses: [['stand', 'normal'], ['read', 'smug'], ['point', 'normal'], ['think', 'normal'], ['cross', 'annoyed'], ['sit', 'smile']],
     lift: { sit: 100 }, moods: ['normal', 'smile', 'smug', 'surprised', 'sad', 'annoyed', 'flustered'] },
+  reimu: { name: '博丽灵梦', fn: drawReimu, h: 500, base: 600,
+    poses: [['stand', 'normal'], ['point', 'smug'], ['gohei', 'annoyed'], ['cross', 'normal'], ['sit', 'smile'], ['bored', 'sleepy']],
+    lift: { sit: 100 }, moods: ['normal', 'smile', 'smug', 'surprised', 'annoyed', 'sleepy'] },
 };
 const chPaper = (c, w, h) => { c.fillStyle = P.paper; c.fillRect(0, 0, w, h); grain(c, polyPath(rectPts(0, 0, w, h)), .12); };
 function chPoses(who) { const S = CH[who], n = S.poses.length, W_ = Math.max(1800, n * 280), H_ = 760;

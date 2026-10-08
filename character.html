@@ -62,9 +62,9 @@ function chPoses(who) { const S = CH[who], n = S.poses.length, W_ = Math.max(180
       zh(c, p + ' · ' + m, x, S.base + 100, { size: 28, align: 'center', color: P.ink2 }); }); } }; }
 function chMoods(who) { const S = CH[who], n = S.moods.length, rows = Math.ceil(n / 4), W_ = 2280, H_ = rows * 620 + 20;
   return { w: W_, h: H_, draw(c, t) { chPaper(c, W_, H_);
-    S.moods.forEach((m, i) => { const cx = 285 + (i % 4) * 570, top = 20 + Math.floor(i / 4) * 620, hh = 1100;
+    S.moods.forEach((m, i) => { const cx = 285 + (i % 4) * 570, top = 20 + Math.floor(i / 4) * 620, hh = S.moodH || 880;
       c.save(); c.beginPath(); c.rect(cx - 285, top, 570, 560); c.clip();
-      S.fn(c, { x: cx, y: top + 1150, h: hh, pose: 'stand', mood: m, t, blink: Q.has('t') ? 0 : blinkAt(t, i + 2) });
+      S.fn(c, { x: cx, y: top + (S.moodY || 900), h: hh, pose: 'stand', mood: m, t, blink: Q.has('t') ? 0 : blinkAt(t, i + 2) });
       c.restore(); zh(c, m, cx, top + 598, { size: 30, align: 'center', color: P.ink2 }); }); } }; }
 const chWho = Q.get('who') ? [Q.get('who')] : Object.keys(CH), chSel = Q.get('sheet'), chFixed = Q.has('t') ? +Q.get('t') : null, chCvs = [];
 for (const who of chWho) for (const [k, mk] of [['poses', chPoses], ['moods', chMoods]]) { if (chSel && chSel !== k) continue;

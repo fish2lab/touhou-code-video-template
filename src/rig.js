@@ -118,7 +118,8 @@ function rigOff(c, T) {
   for (let k = 0; k < 12; k++, off *= 2) { const x = T.e - T.a * off, y = T.f - T.b * off; if (x < -rb || x > cw + rb || y < -rb || y > ch + rb) break; }
   return off;
 }
-const rigEdge = col => RIG_EDGE[col] || (RIG_EDGE[col] = alpha(mix(col, '#ffffff', .5), .6));
+// 描边：深色细线（第三版，学 Flash 短篇的勾线；纸纹和投影照旧）
+const rigEdge = col => RIG_EDGE[col] || (RIG_EDGE[col] = alpha(mix(col, P.ink, .62), .85));
 const RIG_SH = { big: { blur: 5, sx: 2.4, sy: 3.4, al: .3 }, mid: { blur: 3.5, sx: 1.8, sy: 2.4, al: .3 }, tiny: { blur: 1.2, sx: .8, sy: 1, al: .3 }, wing: { blur: 4, sx: 2.6, sy: 3.6, al: .22 } };
 // rigPaint：items = [{ p: Path2D, m: 矩阵, col, edge }]。sh 投影（同层合并一次）；gr 纸纹；al 半透明；flat 不分受光背光（五官）
 function rigPaint(c, items, sh, env, gr = true, al = 1, flat = false) {
@@ -254,10 +255,43 @@ const RIG_EYES = {
     low.push({ p: eyeP, m: head, col: K.eye, edge: false }, { p: irisP, m: head, col: K.iris, edge: false });
     top.push({ p: hiP, m: head, col: K.white, edge: false }, { p: hi2P, m: head, col: K.white, edge: false }, { p: lashP, m: head, col: K.lash, edge: false });
   },
+  // layered（第三版，照 Live2D 拆层，帕秋莉 src/character/patchouli.js 的 pchFace 是样板）：眼白 → 虹膜 → 虹膜下半亮色 → 瞳孔 → 虹膜上沿阴影
+  // → 一大一小两个高光，后五层裁在眼白里（眼睑压下来自动被盖住）；最后压粗上眼线（外眼角一撇）。闭眼、> < 和 round 一样。
+  // 颜色：K.eye 虹膜，可选 K.sclera / K.irisLt / K.pupil / K.irisShade，眼线 K.lid（没有就用 K.lash）
+  layered(e) {
+    const { S, F, K, sd, ex, ey, far, es, md, lidFrac, look, lookY, head, top, key, cut, eyes } = e, lash = K.lid || K.lash;
+    const rx = F.rx * far * es, ry = F.ry * es;
+    if (md.eye === 'squeeze') {
+      top.push({ p: rigMemo(S, 'sq|' + key, () => cut([[8, -6.5], [-7, 0], [8, 6.5], [8, 3.6], [-2.8, 0], [8, -3.6]].map(([px, py]) => [ex + sd * px * far * F.rx / 8, ey + 1 + py * F.ry / 10]), 90 + sd, 3, .15, false)), m: head, col: lash, edge: false });
+      return;
+    }
+    if (md.eye === 'up' || lidFrac > .9) {
+      top.push({ p: rigMemo(S, 'cl|' + key, () => { const up = md.eye === 'up', arc = (up ? -4.4 : 3.4) * F.ry / 16, base = up ? ey + 2 : ey + ry * .55, w = 1.9 * F.ry / 16, pts = [], back = [];
+        for (let k = 0; k <= 10; k++) { const u = k / 10 * 2 - 1, xx = ex + u * (rx + 2), yy = base + arc * (1 - u * u) + sd * u; pts.push([xx, yy - w]); back.unshift([xx, yy + w - Math.abs(u) * .9]); }
+        return cut([...pts, ...back], 92 + sd, 3, .2, false); }), m: head, col: lash, edge: false });
+      return;
+    }
+    const ex2 = ex + look * F.lookX * far, iy = ey + 1.5 + lookY * .4, topY = ey - ry;
+    const lidY = xx => topY + lidFrac * 2 * ry + (md.lidTilt || 0) * (xx - ex) * sd, lowY = md.lower ? ey + ry - md.lower : Infinity;
+    const L = rigMemo(S, 'ly|' + key, () => {
+      const P2 = pts => polyPath(pts, true), irx = rx * .8 * (md.iris || 1), iry = ry * .86 * (md.iris || 1), lidC = lidY(ex2);
+      const white = P2(ellPts(ex, ey, rx, ry, 24).map(([xx, yy]) => [xx, clamp(yy, lidY(xx), lowY)]));
+      const iris = P2(ellPts(ex2, iy, irx, iry, 20));
+      const lay = [[iris, K.eye], [P2(ellPts(ex2, iy + iry * .42, irx * .74, iry * .44, 16)), K.irisLt || mix(K.eye, '#ffffff', .45)],
+        [P2(ellPts(ex2, iy - 1, irx * .42, iry * .46, 14)), K.pupil || mix(K.eye, P.ink, .75)],
+        [P2(ellPts(ex2, Math.max(lidC, iy - iry) - 1, irx * 1.05, iry * .5, 18)), K.irisShade || alpha(mix(K.eye, P.ink, .8), .45), iris],
+        [P2(ellPts(ex2 - irx * .36, iy - iry * .36, rx * .3, ry * .29, 12)), K.white], [P2(ellPts(ex2 + irx * .34, iy + iry * .4, rx * .15, rx * .15, 8)), K.white]];
+      const open = lidFrac < .05, xi = ex - sd * (rx + .5), xo = ex + sd * (rx + 2.4), ly0 = lidY(xi) + (open ? ry * .3 : 0), ly1 = lidY(xo) + (open ? ry * .3 : 0), lm = lerp(ly0, ly1, .5) - (open ? ry * .25 : 0), th = ry * .27;
+      const line = cut([[xi, ly0 - th * .35], [lerp(xi, xo, .5), lm - th], [xo, ly1 - th * 1.05], [xo + sd * rx * .3, ly1 - th * 1.8], [xo + sd * rx * .14, ly1 + th * .2], [lerp(xi, xo, .5), lm + th * .1], [xi, ly0 + th * .3]], 88 + sd, 3, .2, false);
+      return { white, lay, line };
+    });
+    eyes.push({ white: L.white, lay: L.lay, m: head, sclera: K.sclera || '#fbf8f3' });
+    top.push({ p: L.line, m: head, col: lash, edge: false });
+  },
 };
 // rigFace：腮红、眼睛、嘴（、虎牙、眼泪）。参数在部件表的 face 里
 function rigFace(k) {
-  const { S, md, turn, look, lookY, blink, mouth, tt, B, paint } = k, F = S.face, K = S.K, cut = S.cut, head = B[F.bone || 'faceM'], low = [], top = [];
+  const { S, md, turn, look, lookY, blink, mouth, tt, B, paint } = k, F = S.face, K = S.K, cut = S.cut, head = B[F.bone || 'faceM'], low = [], top = [], eyes = [];
   const lidFrac = md.eye && md.eye !== 'open' ? 1 : clamp(lerp(md.lid || 0, 1, blink), 0, 1);
   const qt = rQ(turn), ql = rQ(look), qy = rQ(lookY, 2), qf = rQ(lidFrac);
   for (const sd of [-1, 1]) {
@@ -266,8 +300,11 @@ function rigFace(k) {
     // 腮红
     const bs = md.blush, Bl = F.blush;
     low.push({ p: rigMemo(S, ['b', sd, qt, bs].join('|'), () => cut(ellPts(ex + sd * Bl.dx + turn * Bl.turn, Bl.y + (bs > 1.4 ? Bl.bump : 0), Bl.rx * bs * far, Bl.ry * Math.sqrt(bs), 14), 80 + sd, 4, .3)), m: head, col: K.blush, edge: false });
+    // 腮红斜线（face.blush.hatch = true）：三道斜的深一点的短线
+    if (Bl.hatch) { const bx = ex + sd * Bl.dx + turn * Bl.turn, by = Bl.y + (bs > 1.4 ? Bl.bump : 0) - .5, hs = Bl.ry / 5;
+      low.push({ p: rigMemo(S, ['bh', sd, qt, bs].join('|'), () => { const pp = new Path2D(); for (let j = -1; j <= 1; j++) { const hx = bx + j * Bl.rx * .42 * far; pp.addPath(polyPath([[hx + 1.4 * hs, by - 2.6 * hs], [hx + 2.3 * hs, by - 2.2 * hs], [hx - 1.4 * hs, by + 2.6 * hs], [hx - 2.3 * hs, by + 2.2 * hs]], true)); } return pp; }), m: head, col: mix(K.blush, P.ink, .25), edge: false }); }
     const key = ['e', md.eye || 'open', sd, qt, ql, qy, qf, es, md.iris || 1, md.lower || 0, md.lidTilt || 0].join('|');
-    RIG_EYES[F.style]({ S, F, K, sd, ex, ey, far, es, md, lidFrac, look, lookY, head, low, top, key, cut });
+    RIG_EYES[F.style]({ S, F, K, sd, ex, ey, far, es, md, lidFrac, look, lookY, head, low, top, key, cut, eyes });
   }
   // 嘴：一小片会变形的纸（S.mouth(type, open) → [轮廓, 颜色键, 舌头轮廓?]）
   const mo = rQ(mouth), [mp, mc, tongue] = rigMemo(S, ['m', md.mouth, mo].join('|'), () => { const [pts, col, tg] = S.mouth(md.mouth, mo); return [cut(pts, 95, 2.4, .15, false), col, tg ? cut(tg, 96, 2, .1) : null]; });
@@ -277,6 +314,13 @@ function rigFace(k) {
   // 虎牙：嘴角一颗白色小三角（mood.fang；位置在 face.fang）
   if (md.fang && F.fang) top.push({ p: rigMemo(S, 'fang', () => cut([[-2.2, 0], [2.2, 0], [0, 4.2]], 99, 2, .05, false)), m: rTR(mm, F.fang[0] + (md.mouth === 'smile' || md.mouth === 'laugh' ? -1.5 : 0), F.fang[1]), col: K.white, edge: false });
   paint(low, RIG_SH.tiny, false, 1, true);
+  // layered 眼睛：眼白一片纸，里面几层裁在眼白里
+  for (const e of eyes) {
+    paint([{ p: e.white, m: e.m, col: e.sclera, edge: false }], RIG_SH.tiny, false, 1, true);
+    const c = k.c; c.save(); c.transform(e.m[0], e.m[1], e.m[2], e.m[3], e.m[4], e.m[5]); c.clip(e.white);
+    for (const [p, col, inside] of e.lay) { c.fillStyle = col; if (inside) { c.save(); c.clip(inside); c.fill(p); c.restore(); } else c.fill(p); }
+    c.restore();
+  }
   paint(top, RIG_SH.tiny, false, 1, true);
   // 眼泪：眼下两道半透明的纸条 + 往外落的小纸片（mood.tears；部件 drop、颜色 tear）
   if (md.tears) {
@@ -358,7 +402,7 @@ function drawRig(c, S, o = {}) {
   const sk = Math.sqrt(clamp(s, .4, 3)), T0 = c.getTransform(), dev = Math.hypot(T0.a, T0.b) || 1;
   let pat = null;
   try { pat = c.createPattern(PAPER_GRAIN, 'repeat'); pat.setTransform(new DOMMatrix([1, 0, 0, 1, Math.round(x), Math.round(y)])); } catch (e) { pat = null; }
-  const env = { sk: sk * dev * (1 + .08 * Math.sin(tt * .8)), lw: 1 / (s * dev), pat, L: rigLight(o.light) };
+  const env = { sk: sk * dev * (1 + .08 * Math.sin(tt * .8)), lw: 1.7 / (s * dev), pat, L: rigLight(o.light) };
   k.env = env; k.paint = (items, sh, gr, al, flat) => rigPaint(c, items, sh, env, gr, al, flat);
   // 图层：按表的顺序画
   let clips = 0;

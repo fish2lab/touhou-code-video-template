@@ -48,8 +48,8 @@ const SAK_K = (() => {
 const SAK_CUT = rigCutter(11000);
 // 身子坐标：脖子 -212、腰 -180；root 乘 SAK_BODY（脖子落在 -248），头再乘 SAK_HEAD（合起来 1.2）
 const SAK_BODY = 1.17, SAK_NECK = -212, SAK_WAIST = -180, SAK_HEAD = 1.2 / SAK_BODY, SAK_SH = [28, -200], SAK_UP = 36, SAK_FORE = 36;
-// 头饰那道弧（头坐标）：戴在头顶偏前的荷叶边发箍，正面看是一道拱：正中 -156，两端（x = ±68）低到 -124，藏进鬓发
-const sakBand = x => -156 + 32 * (x / 68) ** 2;
+// 头饰那道弧（头坐标）：戴在头顶偏前的荷叶边发箍，正面看是一道拱：正中 -160，两端（x = ±68）低到 -140（比头顶的圆弧平，正中立出头发、两端收进头发），藏进鬓发
+const sakBand = x => -160 + 20 * (x / 68) ** 2;
 // 二次曲线取点（不含起点）：刘海每一绺是弯的尖叶，两条边都用它画
 const sakQ = (p0, q, p1, n = 5) => Array.from({ length: n }, (_, i) => { const u = (i + 1) / n, v = 1 - u; return [v * v * p0[0] + 2 * u * v * q[0] + u * u * p1[0], v * v * p0[1] + 2 * u * v * q[1] + u * u * p1[1]]; });
 // 手：Q 版手比 RIG_SHAPES 的胖一圈（宽 ×1.4），指尖点不变（同八云紫）
@@ -122,13 +122,22 @@ const SAK_G = (() => {
   // ---- 头（头坐标：脖子关节为原点；下巴 (0,-4)，头顶 -150） ----
   // 圆脸：两颊鼓、下巴小（和帕秋莉同一张脸型，全员统一）
   g.face = cut([[0, -4], [13, -6], [29, -13], [45, -27], [57, -46], [63, -70], [64, -98], [59, -124], [42, -142], [0, -150], [-42, -142], [-59, -124], [-64, -98], [-63, -70], [-57, -46], [-45, -27], [-29, -13], [-13, -6]], 100, 7, .5);
-  // 后发：银白短发，比脸宽一圈、贴着头顶（不高出头骨太多），后颈和两侧到下巴下面，下端往外翘几绺
-  const bSide = rOpen([[0, -171], [40, -166], [64, -147], [75, -118], [77, -86], [76, -60], [77, -40]], 5);
-  const bTips = [[78, -26], [67, -36], [60, -22], [48, -33], [32, -24], [16, -31], [0, -25]];
-  g.backHair = cut([...bSide, ...bTips, ...rMirror([...bSide, ...bTips.slice(0, -1)])], 101, 8, .7, false);
-  // 鬓发：从头饰下面垂到下巴，压在脸的两颊外缘（盖住辫根；上端被发箍两端压住）
-  const lockR = [...rOpen([[48, -128], [65, -118], [72, -98], [74, -66], [72, -40]], 4), [71, -14], [64, -30], [60, -16], [56, -38], ...rOpen([[57, -62], [57, -92], [52, -118]], 4)];
-  g.lockR = cut(lockR, 102, 6, .5, false); g.lockL = cut(rMirror(lockR), 103, 6, .5, false);
+  // 后发（返修二）：短 bob 的蓬松外轮廓——头顶到耳朵外侧一道饱满的圆弧，下巴高度往里收成三束内卷的弯尖；
+  // 右边短、左边长一点（dy），不对称。sd = 1 画右半边（从头顶往下到后颈正中），左半边镜像后反向接上。
+  const bobSide = (sd, dy) => {
+    const arc = Array.from({ length: 9 }, (_, i) => { const a = Math.PI / 2 - i / 8 * Math.PI * .62; return [sd * 79 * Math.cos(a), -110 - 62 * Math.sin(a)]; });
+    return [...rOpen([...arc.slice(0, -1), [sd * 78, -84], [sd * 75, -60], [sd * 74, -46 + dy * .5]], 4),
+      ...sakQ([sd * 74, -46 + dy * .5], [sd * 76, -24 + dy], [sd * 66, -18 + dy], 4), ...sakQ([sd * 66, -18 + dy], [sd * 68, -30 + dy], [sd * 64, -38 + dy], 3),
+      ...sakQ([sd * 64, -38 + dy], [sd * 62, -22 + dy], [sd * 52, -20 + dy], 4), ...sakQ([sd * 52, -24 + dy], [sd * 54, -32 + dy], [sd * 46, -36 + dy], 3),
+      ...sakQ([sd * 46, -36 + dy], [sd * 40, -24 + dy], [sd * 28, -26 + dy], 4), [sd * 14, -30], [0, -28]];
+  };
+  g.backHair = cut([...bobSide(1, 0), ...bobSide(-1, 7).reverse().slice(1, -1)], 101, 8, .7, false);
+  // 鬓发（返修二）：外缘是一道鼓出去的圆弧（贴着后发的 bob），下端在下巴高度内卷成两束弯尖，轻轻包住脸颊；左边长一点
+  const lockPts = (sd, dy) => [[sd * 48, -128], ...rOpen([[sd * 48, -128], [sd * 68, -118], [sd * 79, -96], [sd * 79, -72], [sd * 70, -46 + dy * .5]], 4).slice(1),
+    ...sakQ([sd * 70, -46 + dy * .5], [sd * 68, -26 + dy], [sd * 56, -20 + dy], 4), ...sakQ([sd * 56, -20 + dy], [sd * 62, -30 + dy], [sd * 61, -40 + dy], 3),
+    ...sakQ([sd * 61, -40 + dy], [sd * 58, -30 + dy], [sd * 50, -28 + dy], 4), ...sakQ([sd * 50, -28 + dy], [sd * 56, -44 + dy * .5], [sd * 57, -62], 4),
+    ...rOpen([[sd * 57, -62], [sd * 58, -92], [sd * 52, -118]], 4).slice(1)];
+  g.lockR = cut(lockPts(1, 0), 102, 6, .5, false); g.lockL = cut(lockPts(-1, 6), 103, 6, .5, false);
   // 细麻花辫（辫根为原点，朝 +y 垂下）：一节一节的锯齿 + 斜纹，辫梢在胸口高度系绿色小蝴蝶结，下面再垂一撮发尾
   const bl = [], br = []; for (let i = 0; i <= 7; i++) { const y = i * 7.4, w = 3.9 - i * .08; bl.push([-w - (i % 2) * 1.3, y]); br.unshift([w + ((i + 1) % 2) * 1.3, y]); }
   g.braid = cut([...bl, [0, 55], ...br], 104, 4, .2, false);
@@ -138,7 +147,8 @@ const SAK_G = (() => {
   g.braidKnot = cut(ellPts(0, 52.6, 2.2, 2.4, 8), 115, 2, .05, false);
   // 头顶 + 刘海（返修：去掉头盔感）：头顶一道贴头的圆弧（左上、右侧各翘出一小撮），刘海在 x = 24 处斜分：
   // 分缝左边三绺长发弯着斜跨额头、最长一绺尖落在左眼内眼角；右边两绺短的往外撇，露出一角额头。整片不对称。
-  const crown = [[-72, -110], [-75, -132], [-69, -151], [-56, -164], [-57, -172], [-47, -170], [-24, -175], [0, -177], [24, -175], [46, -168], [62, -157], [71, -144], [75, -128], [81, -121], [73, -115], [72, -110]];
+  const crown = (() => { const pts = Array.from({ length: 17 }, (_, i) => { const a = Math.PI - i / 16 * Math.PI; return [77 * Math.cos(a), -112 - 60 * Math.sin(a)]; });
+    return [...pts.slice(0, -1), [78, -121], [83, -116], [74, -112], [72, -110]]; })();
   const PART = [24, -117];
   const fringe = [
     ...sakQ([72, -110], [75, -95], [68, -79]), ...sakQ([68, -79], [60, -88], [54, -102], 4),       // 右二：短，往外撇
@@ -157,12 +167,13 @@ const SAK_G = (() => {
   ];
   g.crownLines = [strand(sakQ([18, -174], [-14, -172], [-40, -160], 5), 1.2, 6), strand(sakQ([26, -173], [48, -166], [60, -152], 4), 1.1, 7)];
   // 女仆头饰（返修）：头顶偏前的一道细发箍（sakBand），上面立着一圈白色荷叶边，像褶边王冠竖在头发上，两端变矮、藏进鬓发。
-  const frTop = rScallop(u => { const x = lerp(-66, 66, u); return [x, sakBand(x) - 15 + 7 * (x / 66) ** 2]; }, 11, 3.8);
+  const frTop = rScallop(u => { const x = lerp(-66, 66, u); return [x, sakBand(x) - 19 + 17 * (x / 66) ** 2]; }, 13, 4);
   const frBot = []; for (let k = 0; k <= 16; k++) { const x = lerp(68, -68, k / 16); frBot.push([x, sakBand(x) + 2]); }
   g.frill = cut([...frTop, ...frBot], 130, 4, .4, false);
   const bandL = []; for (let k = 0; k <= 16; k++) { const x = lerp(-72, 72, k / 16); bandL.push([x, sakBand(x) + 2.5]); }
   g.hairband = cut(rStroke(bandL, 3.4), 131, 6, .15, false);
-  g.frillPleats = [-52, -26, 0, 26, 52].map((x, i) => { const hgt = 12 - 5 * (x / 70) ** 2; return cut([[x - .6, sakBand(x) - 1], [x + .6, sakBand(x) - 1], [x * 1.05 + .5, sakBand(x) - hgt], [x * 1.05 - .5, sakBand(x) - hgt]], 132 + i, 4, .05, false); });
+  g.frillPleats = Array.from({ length: 12 }, (_, i) => { const x = -60 + i * (120 / 11) + 5, hgt = 16 - 14 * (x / 66) ** 2;
+    return cut([[x - .8, sakBand(x) - 1], [x + .8, sakBand(x) - 1], [x * 1.04 + .4, sakBand(x) - hgt], [x * 1.04 - .4, sakBand(x) - hgt]], 150 + i, 4, .05, false); });
   // 表情道具：汗滴
   g.sweat = cut(RIG_SHAPES.sweat.map(([x, y]) => [x * 1.3, y * 1.3]), 140, 3, .2);
   return g;

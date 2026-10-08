@@ -1,7 +1,7 @@
 # 纯代码做一集东方视频 · Touhou, Drawn in Code · コードで描く東方
 
 [![MIT](https://img.shields.io/badge/license-MIT-6b4f8a)](LICENSE)
-[![demo](https://img.shields.io/badge/demo-92s%20film-c9a24a)](https://fish2lab.github.io/touhou-code-video-template/film/)
+[![demo](https://img.shields.io/badge/demo-97s%20film-c9a24a)](https://fish2lab.github.io/touhou-code-video-template/film/)
 [![assets](https://img.shields.io/badge/image%20assets-0-2a2230)](#常见问题)
 [![agents](https://img.shields.io/badge/AI%20agents-AGENTS.md%20%C2%B7%20llms.txt-4b3b7a)](#给-ai-agent)
 
@@ -11,7 +11,7 @@
 
 **日本語**　JavaScript と Canvas 2D だけで、ボイスと BGM 付きの東方Project 二次創作解説動画を一本作るためのオープンソーステンプレートです。画面の一筆一筆がコードの一行に対応します。14 人の切り絵風 SD キャラ（2024–2026 年の東方人気投票トップ 10 全員を含む）、手書き文字、紙の質感と影はすべてプログラムで生成され、画像素材も AI 生成画像も使っていません。各フレームは時刻 t だけで決まるので、任意の秒へ飛ぶことも、分割して並列レンダリングすることもでき、結果は頭から順に描いた場合と同じです。
 
-**[介绍网页 / Project page](https://fish2lab.github.io/touhou-code-video-template/)** · **[92 秒演示片 / Demo film](https://fish2lab.github.io/touhou-code-video-template/film/)** · **[十个特效 / 10 effects](https://fish2lab.github.io/touhou-code-video-template/highlights/)** · [教程](docs/教程.md) · [经验](docs/经验.md) · [角色名单 / Cast](docs/角色名单.md) · [llms.txt](llms.txt)
+**[介绍网页 / Project page](https://fish2lab.github.io/touhou-code-video-template/)** · **[97 秒演示片 / Demo film](https://fish2lab.github.io/touhou-code-video-template/film/)** · **[十个特效 / 10 effects](https://fish2lab.github.io/touhou-code-video-template/highlights/)** · [教程](docs/教程.md) · [经验](docs/经验.md) · [角色名单 / Cast](docs/角色名单.md) · [llms.txt](llms.txt)
 
 ![十四位 Q 版剪纸角色并排站立，头和身子一样大 / 14 paper-cut chibi Touhou characters drawn in code](site/media/lineup.jpg)
 
@@ -107,7 +107,7 @@ docs/                 教程、经验、各类文档模板
 
 **能交给 AI agent 写吗？** 能，这个仓库本身就是这样做的。让 agent 先读 [`AGENTS.md`](AGENTS.md)；给 AI 读的项目摘要在 [`llms.txt`](llms.txt)。
 
-**渲染要多久？** 92 秒的演示片在 4 核云端机器上开 3 个并行页面约 135 秒。
+**渲染要多久？** 97 秒的演示片，在 MacBook Air（M5）上开 4 个并行页面约 56 秒（2026-10-08 实测）。
 
 **可以拿去发 B 站 / YouTube / ニコニコ吗？** 代码是 MIT。成片是东方 Project 二次创作，请遵守官方二次创作指南，并在简介注明 AquesTalk 和原曲出处（见下面「许可」）。
 

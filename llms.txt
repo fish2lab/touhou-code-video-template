@@ -12,7 +12,7 @@ Key facts:
 - The first ten are exactly the top 10 of the character division of the fan-run Touhou Project Popularity Poll (東方Project人気投票) in 2024, 2025 and 2026 (toho-vote.info); the other four come from the "Patchouli Lecture" series.
 - Hard rules: no Math.random() (seeded hash/rng instead), no per-frame canvas filters, every script uses its own global name prefix (all scripts share one global scope), people never overlap props or text unless the contact is designed.
 - Cheap checks: `node tools/sheet.mjs --who <id>` (pose and mood sheets, exit code 1 on page errors); `node tools/frames.mjs --scene <name> --grid 24` (contact sheet of a scene); `node tools/overlap.mjs --scene <name>` (overlap check).
-- Render time: the 92-second demo renders in about 135 seconds with 3 parallel pages on a 4-core cloud machine.
+- Render time: the 97-second demo renders in about 56 seconds with 4 parallel pages on a MacBook Air (M5), measured 2026-10-08.
 - Touhou Project characters are © Team Shanghai Alice (ZUN); this is a fan-work tool, not official content.
 
 ## Docs
@@ -27,7 +27,7 @@ Key facts:
 ## Demos
 
 - [Project page](https://fish2lab.github.io/touhou-code-video-template/)
-- [92-second demo film, rendered live in the browser](https://fish2lab.github.io/touhou-code-video-template/film/)
+- [97-second demo film, rendered live in the browser](https://fish2lab.github.io/touhou-code-video-template/film/)
 - [Ten reusable effects](https://fish2lab.github.io/touhou-code-video-template/highlights/)
 
 ## Optional

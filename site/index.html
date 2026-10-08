@@ -45,11 +45,11 @@
     {
       "@type": "VideoObject",
       "name": "纯代码做一集东方视频：模板演示片",
-      "description": "92 秒演示片，全部画面由 Canvas 代码逐帧绘制。",
+      "description": "97 秒演示片，全部画面由 Canvas 代码逐帧绘制。",
       "thumbnailUrl": "https://fish2lab.github.io/touhou-code-video-template/media/lineup.jpg",
       "embedUrl": "https://fish2lab.github.io/touhou-code-video-template/film/",
       "uploadDate": "2026-10-04",
-      "duration": "PT1M32S"
+      "duration": "PT1M37S"
     }
   ]
 }
@@ -136,7 +136,7 @@ footer p { margin-bottom: 10px; }
    "name": "渲染要多久？",
    "acceptedAnswer": {
     "@type": "Answer",
-    "text": "92 秒的演示片，在 4 核云端机器上开 3 个并行页面约 135 秒。"
+    "text": "97 秒的演示片，在 MacBook Air（M5）上开 4 个并行页面约 56 秒。"
    }
   }
  ]
@@ -161,7 +161,7 @@ footer p { margin-bottom: 10px; }
     <p lang="ja">コードで描く東方 —— JavaScript と Canvas 2D だけで、ボイスと BGM 付きの東方二次創作解説動画を作るオープンソーステンプレート。画像素材も AI 生成画像も使っていません。</p>
     <div class="links">
       <a href="https://github.com/fish2lab/touhou-code-video-template">源码</a>
-      <a href="film/">看完整演示片（92 秒，有声音）</a>
+      <a href="film/">看完整演示片（97 秒，有声音）</a>
       <a href="highlights/">十个可复用的特效</a>
     </div>
   </header>
@@ -170,7 +170,7 @@ footer p { margin-bottom: 10px; }
 <div class="wide">
   <figure>
     <video autoplay muted loop playsinline preload="metadata" src="media/film-cast.mp4"></video>
-    <figcaption>七位角色同台，头和身子一样大。这一段是模板自带的演示场景，写在 <code>src/scenes/1-cast.js</code> 里。</figcaption>
+    <figcaption>十四位角色分两排同台，头和身子一样大，前十位是近三年东方人气投票的前十名。这一段是模板自带的演示场景，写在 <code>src/scenes/1-cast.js</code> 里。</figcaption>
   </figure>
 </div>
 
@@ -254,7 +254,7 @@ fxPlay('pinwheel-tiles', c, tau, { box: [x, y, w, h], t0: 1.2, speed: 1.5 });</c
 
   <h2>出片</h2>
   <p>出片脚本开几个无界面浏览器，把全片切成几段。每个浏览器逐帧调用同一个 <code>renderAt(t)</code>，导出 JPEG，直接通过管道交给 ffmpeg，不落盘。几段编码完拼接，再混上离线渲染的声音。</p>
-  <p>92 秒的演示片，在一台 4 核的云端机器上用 3 个并行页面渲染，用了约 135 秒。想要 4K，加一个 <code>--scale 2</code>，建议放到自己的电脑上跑。</p>
+  <p>97 秒的演示片，在一台 MacBook Air（M5）上用 4 个并行页面渲染，用了约 56 秒。想要 4K，加一个 <code>--scale 2</code>，建议放到自己的电脑上跑。</p>
 
   <h2>展望</h2>
   <p>我们把这个仓库当成两件事的试验台。在艺术这一边，它是用代码当画笔的同人创作：剪纸的折角、手绘线的呼吸、八音盒改编的角色曲都是可以读、可以改的规则，一位画师的风格可以写成一份部件表，像乐谱一样被别人演奏。在研究这一边，它是一份可复现的视觉程序语料：画面完全确定，「模型写的动画好不好」可以落到具体的帧和具体的行，适合拿来考察编码 agent 的视觉程序合成、长任务规划和多 agent 并行协作。这个仓库本身就是人和多个 AI agent 一起写的。</p>
@@ -265,7 +265,7 @@ fxPlay('pinwheel-tiles', c, tau, { box: [x, y, w, h], t0: 1.2, speed: 1.5 });</c
   <p><b>为什么是这十四个角色？</b>其中十位是第 20–22 回「東方Project人気投票」（2024–2026）人妖部门三届前十的全部成员，三届是同一批人；另外四位来自「帕秋莉讲座」系列。</p>
   <p><b>要会画画吗？</b>不用，要会一点 JavaScript。角色是部件表，改颜色和轮廓就是新角色；场景是只依赖时间 t 的函数。</p>
   <p><b>能交给 AI agent 写吗？</b>能，这个仓库本身就是这样做的。先让 agent 读仓库里的 AGENTS.md。</p>
-  <p><b>渲染要多久？</b>92 秒的演示片，在 4 核云端机器上开 3 个并行页面约 135 秒。</p>
+  <p><b>渲染要多久？</b>97 秒的演示片，在 MacBook Air（M5）上开 4 个并行页面约 56 秒。</p>
 
   <h2>开始</h2>
 <pre><code>git clone https://github.com/fish2lab/touhou-code-video-template

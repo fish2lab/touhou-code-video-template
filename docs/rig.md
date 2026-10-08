@@ -50,7 +50,7 @@
 1. 复制 `yukari.js`（拿东西的角色照 `ran.js`），改前缀和种子偏移
 2. 改颜色和部件轮廓。骨架常数（`*_BODY`、`*_HEAD`、`*_NECK`、肩位、臂长）照抄第三版的值，别改，全员头和身子才一样大
 3. 从现有角色借嘴型、手型。现有手型不够时可以在自己的文件里加带腕角的手型（例：`satori.js` 的 `press`）或单独的握持图层（例：`ran.js` 的 `ranGrip`），不用动 rig.js
-4. `character.html` 的 `CH` 表加一项（fn、poses、moods），打开 `character.html?who=名字` 看样张
+4. `character.html` 的 `CH` 表加一项（fn、poses、moods），打开 `character.html?who=名字` 看样张；再把 id 加进 `CH_LINEUP`，`node tools/sheet.mjs --sheet lineup` 重拍合照（缩到 1600 宽存成 `site/media/lineup.jpg`）
 
 ## 弹簧和光照
 

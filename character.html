@@ -13,7 +13,7 @@ canvas { display: block; margin: 0 auto 16px; max-width: 100%; }
 </style>
 </head>
 <body>
-<!-- 开发用样张页：?who=patchouli|cirno|ran|meiling|remilia|yukari|satori|reimu|flandre|mokou|sakuya|youmu|marisa|koishi（默认全部），?sheet=poses|moods，?t=秒 固定时间（不传则动画播放） -->
+<!-- 开发用样张页：?who=patchouli|cirno|ran|meiling|remilia|yukari|satori|reimu|flandre|mokou|sakuya|youmu|marisa|koishi（默认全部），?sheet=poses|moods|lineup（全员合照），?t=秒 固定时间（不传则动画播放） -->
 <div id="nav">
   <a href="?who=patchouli">帕秋莉</a><a href="?who=cirno">琪露诺</a><a href="?who=ran">八云蓝</a><a href="?who=meiling">红美铃</a><a href="?who=remilia">蕾米莉亚</a><a href="?who=yukari">八云紫</a><a href="?who=satori">古明地觉</a><a href="?who=reimu">博丽灵梦</a><a href="?who=flandre">芙兰朵露</a><a href="?who=mokou">藤原妹红</a><a href="?who=sakuya">十六夜咲夜</a><a href="?who=youmu">魂魄妖梦</a><a href="?who=marisa">雾雨魔理沙</a><a href="?who=koishi">古明地恋</a><a href="?">全部</a>
 </div>
@@ -94,8 +94,17 @@ function chMoods(who) { const S = CH[who], n = S.moods.length, rows = Math.ceil(
       c.save(); c.beginPath(); c.rect(cx - 285, top, 570, 560); c.clip();
       S.fn(c, { x: cx, y: top + (S.moodY || 900), h: hh, pose: 'stand', mood: m, t, blink: Q.has('t') ? 0 : blinkAt(t, i + 2) });
       c.restore(); zh(c, m, cx, top + 598, { size: 30, align: 'center', color: P.ink2 }); }); } }; }
+// 合照（?sheet=lineup）：全员 stand 两排并列，顺序按 docs/角色名单.md（人气投票前十在前）；介绍网页和 README 的 site/media/lineup.jpg 就是这张
+const CH_LINEUP = ['reimu', 'marisa', 'flandre', 'koishi', 'youmu', 'sakuya', 'remilia', 'satori', 'mokou', 'cirno', 'patchouli', 'meiling', 'yukari', 'ran'];
+function chLineup() { const per = 7, rows = Math.ceil(CH_LINEUP.length / per), W_ = per * 300 + 100, rowH = 720, H_ = rows * rowH;
+  return { w: W_, h: H_, draw(c, t) { chPaper(c, W_, H_);
+    CH_LINEUP.forEach((who, i) => { const S = CH[who], x = 50 + 300 * (i % per + .5), y = Math.floor(i / per) * rowH + 640;
+      S.fn(c, { x, y, h: S.h, pose: 'stand', mood: 'normal', t: t + i * .37, blink: 0, mouth: 0, facing: i % per < per / 2 ? 1 : -1 });
+      zh(c, S.name, x, y + 52, { size: 30, align: 'center', color: P.ink2 }); }); } }; }
 const chWho = Q.get('who') ? [Q.get('who')] : Object.keys(CH), chSel = Q.get('sheet'), chFixed = Q.has('t') ? +Q.get('t') : null, chCvs = [];
-for (const who of chWho) for (const [k, mk] of [['poses', chPoses], ['moods', chMoods]]) { if (chSel && chSel !== k) continue;
+if (chSel === 'lineup') { const S = chLineup(), cv = document.createElement('canvas'); cv.width = S.w; cv.height = S.h; cv.id = 'lineup'; cv.style.width = '1600px';
+  document.getElementById('wrap').appendChild(cv); chCvs.push([cv.getContext('2d'), S]); }
+else for (const who of chWho) for (const [k, mk] of [['poses', chPoses], ['moods', chMoods]]) { if (chSel && chSel !== k) continue;
   const S = mk(who), cv = document.createElement('canvas'); cv.width = S.w; cv.height = S.h; cv.id = who + '-' + k; cv.style.width = Math.min(S.w, 1600) + 'px';
   document.getElementById('wrap').appendChild(cv); chCvs.push([cv.getContext('2d'), S]); }
 const chDraw = t => { for (const [c, S] of chCvs) { c.save(); S.draw(c, t); c.restore(); } };

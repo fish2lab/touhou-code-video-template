@@ -20,9 +20,9 @@
 //
 // 设计坐标：照帕秋莉的做法，身子部件按「身子坐标」画（脖子 -212、肩 ±28、腰 -180），root 骨头整体乘 MAR_BODY = 1.17，脖子落在 -248；
 // 头部件用「头坐标」（原点在脖子关节，下巴 (0,-4)，头顶 -150），头骨头再乘 MAR_HEAD，合起来 1.2 倍：脸宽约 154、下巴到头顶约 180。
-// 帽子（按 rig.md 帽子规则）：软塌的大魔女帽。帽檐宽约脸宽的 2.1 倍，两端往下耷拉、边缘带两处起伏，整顶帽子略歪（屏幕左低右高）；
-// 帽檐两层：上面黑、下沿露一条深紫里衬。帽身底座比头顶宽，下沿贴着帽檐那道弧罩住整个头顶，帽檐前沿那一条压在帽身下沿前面；
-// 头发全部画在帽子之前，不会夹在帽子两层之间。尖顶软软地往一侧折下来（折处一道阴影），帽身三道褶；底部白缎带、正面偏右一个大白蝴蝶结。
+// 帽子（按 rig.md 帽子规则）：软塌的大魔女帽。帽檐宽约脸宽的 1.9 倍，前沿是中间最低的下鼓弧，两端往下耷拉、尖端略外翻，整顶帽子略歪；
+// 帽檐两层：上面黑、前沿和两端下面露一条深紫里衬。帽身底座 ±70 比头顶宽，下沿贴着帽檐那道弧罩住整个头顶，帽檐前沿那一条压在帽身下沿前面；
+// 头发全部画在帽子之前，不会夹在帽子两层之间。帽身两侧内凹往上收，到顶先变窄再软软地往一侧塌下来（和帽身同一张纸，折处一道阴影），帽身三道褶；底部白缎带、正面偏右一个大白蝴蝶结。
 // 本文件顶层名字都带 mar / MAR 前缀。
 
 // ===================== 颜色（压暗、低饱和；黑白分明，金发和稻草要暖） =====================
@@ -32,7 +32,7 @@ const MAR_K = (() => {
     hair, hairBack, hairLine: mix(hairBack, hair, .3), hairHi: mix(hair, white, .3),
     black, blackLite: mix(black, '#8a8098', .22), fold: mix(black, '#9a90a8', .3),
     white, shirt: '#f3efe8', frill: '#f8f5ef', apron: '#f4f1ea', apronFold: mix('#f4f1ea', '#8f8798', .28),
-    hat: '#2a2630', hatLit: mix('#2a2630', '#8d84a0', .2), hatBrim: mix('#2a2630', '#7a7090', .14), hatLip: '#24212a', hatFold: mix('#2a2630', P.ink, .4), hatFlop: mix('#2a2630', '#8d84a0', .13), hatUnder: '#463a66', hatUnderDeep: '#352c50',
+    hat: '#2a2630', hatLit: mix('#2a2630', '#8d84a0', .2), hatBrim: mix('#2a2630', '#7a7090', .14), hatLip: '#24212a', hatFold: mix('#2a2630', P.ink, .4), hatUnder: '#463a66', hatUnderDeep: '#352c50',
     ribbon: '#f4f0e9', ribbonKnot: mix('#f4f0e9', '#8f8798', .3),
     skin: P.skin, blush: P.blush, sock: '#f3eee9', shoe: '#2a2630', shoeHi: mix('#2a2630', '#9a90a8', .3),
     // 眼睛分层（第三版）：金色虹膜、下半亮黄、深棕瞳孔、上沿阴影；粗眼线深棕
@@ -54,17 +54,17 @@ function marAlong(pts) {
   const T = L[L.length - 1];
   return u => { const d = clamp(u, 0, 1) * T; let i = 1; while (i < L.length - 1 && L[i] < d) i++; const f = (d - L[i - 1]) / ((L[i] - L[i - 1]) || 1); return [lerp(pts[i - 1][0], pts[i][0], f), lerp(pts[i - 1][1], pts[i][1], f)]; };
 }
-// 帽子（头坐标）：帽檐中心 (0, MAR_BRIM.y)，半径 rx × ry，两端耷拉 droop、边缘起伏 wave；整顶帽子按 tilt 歪一点（y += tilt·x）
-// 帽身下沿是一道半径 MAR_CROWN 的前弧，两端正好落在帽檐后沿上
-const MAR_BRIM = { y: -128, rx: 138, ry: 28, ryB: 16, droop: 26, wave: 5, tilt: -.05 }, MAR_CROWN = { y: -136, rx: 80, ry: 14 };
+// 帽子（头坐标）：帽檐半宽 R（约 1.9 倍脸宽），前沿 marBrimF 是一道中间最低的下鼓弧，两端再往下耷拉、尖端略往外翻；后沿 marBrimT 是扁弧
+// 整顶帽子按 tilt 歪一点（y += tilt·x）；帽身下沿是一道半径 MAR_CROWN 的前弧，两端正好落在帽檐后沿上
+const MAR_BRIM = { y: -122, R: 122, front: 28, back: 22, droop: 20, wave: 2.2, flip: 7, tilt: -.04 }, MAR_CROWN = { y: -139, rx: 72, ry: 15, h: 80 };
 const marTilt = pts => pts.map(([x, y]) => [x, y + MAR_BRIM.tilt * x]);
 const marCrownBase = x => MAR_CROWN.y + MAR_CROWN.ry * Math.sqrt(Math.max(0, 1 - (x / MAR_CROWN.rx) ** 2)) + MAR_BRIM.tilt * x;
-// 帽檐轮廓上角度 a 的点（a = 0 右端，π/2 正前方最低处；前半弧 ry、后半弧 ryB 扁一些）；under > 0 时前沿和两端再往下放，给紫色里衬用
-function marBrimPt(a, under = 0) {
-  const B = MAR_BRIM, x = B.rx * Math.cos(a), s = Math.abs(x) / B.rx, front = Math.max(0, Math.sin(a));
-  const y = B.y + (Math.sin(a) > 0 ? B.ry : B.ryB) * Math.sin(a) + B.droop * s ** 3 + B.wave * Math.sin(x * .07 + .9) * s ** 1.2 + under * (front * .8 + .9 * s ** 3);
-  return [x, y + B.tilt * x];
-}
+const marBrimS = x => Math.min(1, Math.abs(x) / MAR_BRIM.R);
+const marBrimDroop = x => { const B = MAR_BRIM, s = marBrimS(x), u = clamp((s - .62) / .38, 0, 1); return B.droop * u * u * (3 - 2 * u) + B.wave * Math.sin(x * .09 + .9) * s * s + B.tilt * x; };
+const marBrimF = x => MAR_BRIM.y + MAR_BRIM.front * Math.cos(Math.PI / 2 * marBrimS(x)) ** 1.5 + marBrimDroop(x);
+const marBrimT = x => MAR_BRIM.y - MAR_BRIM.back * Math.sqrt(Math.max(0, 1 - marBrimS(x) ** 2)) + marBrimDroop(x);
+// 帽身两侧：t 0（底座 ±70）→ 1（折点 ±14），往上收的内凹软曲线
+const marCrownSide = (sd, t) => { const C = MAR_CROWN, x = sd * (14 + (C.rx - 14) * (1 - t) ** 1.4); return [x, marCrownBase(x) - C.h * t + (sd < 0 ? -4 * t : 0)]; };
 // 扫帚（扫帚头系绳处为原点，柄朝 +y 长 MAR_BROOM.len，稻草朝 -y 长 MAR_BROOM.straw）
 const MAR_BROOM = { len: 200, straw: 78, grip: 140 };
 // 手：Q 版手比 RIG_SHAPES 的胖一圈（宽 ×1.4），指尖点不变
@@ -151,35 +151,34 @@ const MAR_G = (() => {
   g.bangs = cut([[-66, -140], [66, -140], [67, -108], [63, -80], [56, -96], [49, -72], [39, -92], [29, -74], [18, -95], [9, -76], [1, -98], [-6, -78], [-15, -96], [-25, -72], [-35, -93], [-46, -73], [-55, -96], [-63, -80], [-67, -108]], 165, 6, .5, false);
   g.bangLines = [[29, -74, 32, -122], [9, -76, 6, -124], [-25, -72, -28, -122], [49, -72, 54, -116], [-46, -73, -52, -114]].map(([x0, y0, x1, y1], i) => cut([[x0 - .9, y0], [x1 - 1.7, y1], [x1 + 1.7, y1], [x0 + .9, y0]], 166 + i, 8, .2, false));
   // ---- 魔女帽（头坐标）----
-  // 帽檐：整片（里衬在下、黑面在上，里衬前沿多露一条），帽身罩在它上面，前沿一条（同样两层）再压到帽身下沿前面
-  const BR = MAR_BRIM, CR = MAR_CROWN, NA = 64;
-  const ring = under => Array.from({ length: NA }, (_, i) => marBrimPt(i / NA * TAU, under));
-  g.brimUnder = cut(ring(11), 180, 6, .5); g.brim = cut(ring(0), 181, 6, .5);
-  g.brimClip = polyPath(ring(12), true);
-  // 前沿：外圈前半（右端 → 左端），再沿后沿回到帽身左下角，沿帽身下沿那道前弧走到右下角，再沿后沿回右端
-  const lip = under => { const out = []; for (let k = 0; k <= 32; k++) out.push(marBrimPt(k / 32 * Math.PI, under));
-    const back = []; for (let k = 0; k <= 24; k++) { const p = marBrimPt(Math.PI + k / 24 * Math.PI); if (Math.abs(p[0]) > CR.rx + 2) back.push(p); }
-    const base = []; for (let k = 0; k <= 20; k++) { const x = lerp(-CR.rx, CR.rx, k / 20); base.push([x, marCrownBase(x) - 1]); }
-    return [...out, ...back.filter(p => p[0] < 0), ...base, ...back.filter(p => p[0] > 0)]; };
-  g.brimLipUnder = cut(lip(11), 182, 6, .4, false); g.brimLip = cut(lip(0), 183, 6, .4, false);
-  // 帽檐上的亮边和从帽身散开的几道软褶
-  g.brimRim = cut(rStroke(Array.from({ length: 15 }, (_, k) => { const [x, y] = marBrimPt(.28 + k / 14 * (Math.PI - .56)); return [x * .96, y - 3.4]; }), u => 1.9 - 1.2 * Math.abs(2 * u - 1)), 184, 8, .1, false);
-  g.brimFolds = [-.78, -.42, .3, .66].map((u, i) => { const xb = u * CR.rx * .95, [xo, yo] = marBrimPt(Math.acos(clamp(u * 1.18, -.97, .97)));
-    return cut(rStroke([[xb, marCrownBase(xb) + 2], [lerp(xb, xo, .55), lerp(marCrownBase(xb), yo, .55) + 1], [xo * .97, yo - 3]], u2 => 2 - 1.6 * u2), 185 + i, 6, .15, false); });
-  // 帽身：底座 ±80（比头顶和头发都宽，罩住整个头顶），往上收窄，略鼓；顶上被折下来的尖盖住
-  const base = []; for (let k = 0; k <= 20; k++) { const x = lerp(CR.rx, -CR.rx, k / 20); base.unshift([x, marCrownBase(x)]); }
-  const crSide = marTilt([[80, -136], [76, -156], [68, -180], [57, -204], [45, -226], [32, -244], [18, -256], [6, -258], [-6, -254], [-16, -242], [-26, -228], [-39, -204], [-53, -180], [-66, -158], [-76, -146], [-80, -136]]);
-  g.crown = cut([...base, ...crSide.slice(1, -1)], 190, 7, .6);
-  g.crownLit = cut(marTilt([[-80, -136], [-38, -124], [-30, -160], [-22, -196], [-14, -228], [-10, -244], [-16, -248], [-26, -228], [-39, -204], [-53, -180], [-66, -158], [-76, -146]]), 191, 6, .4);
-  g.crownFolds = [[-46, -130, -36, -168, -24, -206], [-4, -126, 0, -166, 6, -212], [36, -130, 34, -164, 28, -196]].map(([x0, y0, x1, y1, x2, y2], i) =>
+  // 帽檐：整片（里衬在下、黑面在上，里衬只在前沿和两端下面露一条跟着弧走的细边），帽身罩在它上面，前沿一条（同样两层）再压到帽身下沿前面
+  const BR = MAR_BRIM, CR = MAR_CROWN, NX = 40;
+  const xs = Array.from({ length: NX + 1 }, (_, k) => lerp(BR.R, -BR.R, k / NX));
+  const tip = (sd, under) => [sd * (BR.R + BR.flip), marBrimF(sd * BR.R) - 4 + under * .6];
+  const front = under => [tip(1, under), ...xs.map(x => [x, marBrimF(x) + under * (.55 + .45 * marBrimS(x) ** 2)]), tip(-1, under)];
+  const top = xs.slice().reverse().map(x => [x, marBrimT(x)]);
+  g.brimUnder = cut([...front(7), ...top], 180, 5, .4); g.brim = cut([...front(0), ...top], 181, 5, .4);
+  g.brimClip = polyPath([...front(8), ...top], true);
+  const base = []; for (let k = 0; k <= 20; k++) { const x = lerp(-CR.rx, CR.rx, k / 20); base.push([x, marCrownBase(x)]); }
+  const lip = under => [...front(under), ...top.filter(p => p[0] < -CR.rx - 1), ...base.map(([x, y]) => [x, y - 1]), ...top.filter(p => p[0] > CR.rx + 1)];
+  g.brimLipUnder = cut(lip(7), 182, 5, .4, false); g.brimLip = cut(lip(0), 183, 5, .4, false);
+  // 帽檐上沿着前沿的亮边和从帽身散开的几道软褶
+  g.brimRim = cut(rStroke(xs.slice(5, -5).map(x => [x * .97, marBrimF(x) - 3.2]), u => 1.9 - 1.2 * Math.abs(2 * u - 1)), 184, 8, .1, false);
+  g.brimFolds = [-.8, -.4, .32, .7].map((u, i) => { const xb = u * CR.rx * .92, xo = xb * 1.45;
+    return cut(rStroke(rOpen([[xb, marCrownBase(xb) + 2], [lerp(xb, xo, .55), lerp(marCrownBase(xb), marBrimF(xo), .55)], [xo, marBrimF(xo) - 3]], 4), u2 => 2 - 1.6 * u2), 185 + i, 6, .15, false); });
+  // 帽身 + 折下来的尖是同一张纸：两侧内凹往上收，到折点 ±14 先变窄，再往屏幕右侧塌下来，尖端短而圆钝、微微往里卷
+  const crR = Array.from({ length: 9 }, (_, k) => marCrownSide(1, k / 8)), crL = Array.from({ length: 9 }, (_, k) => marCrownSide(-1, 1 - k / 8));
+  const fold = marTilt([[22, -212], [31, -208], [39, -201], [44, -193], [46, -186], [50, -181], [55, -182], [58, -189], [57, -200], [51, -213], [40, -225], [24, -233], [6, -234], [-7, -229], [-14, -222]]);
+  g.crown = cut([...base, ...crR.slice(1), ...fold, ...crL], 190, 6, .5);
+  const litO = Array.from({ length: 9 }, (_, k) => marCrownSide(-1, k / 8 * .92));
+  g.crownLit = cut([...litO, ...litO.slice().reverse().map(([x, y], k) => [x * .5, y + (k === litO.length - 1 ? 9 : 0)])], 191, 6, .3);
+  g.crownFolds = [[-40, -128, -30, -158, -18, -190], [-4, -123, -2, -160, 2, -196], [30, -126, 26, -154, 19, -180]].map(([x0, y0, x1, y1, x2, y2], i) =>
     cut(rStroke(rOpen(marTilt([[x0, y0], [x1, y1], [x2, y2]]), 4), u => 2.6 - 2.1 * u), 192 + i, 6, .2, false));
-  g.crownFoldsLit = [[-40, -130, -31, -166, -20, -200], [2, -126, 6, -164, 11, -204]].map(([x0, y0, x1, y1, x2, y2], i) =>
+  g.crownFoldsLit = [[-35, -128, -25, -158, -14, -188], [2, -123, 4, -160, 7, -194]].map(([x0, y0, x1, y1, x2, y2], i) =>
     cut(rStroke(rOpen(marTilt([[x0, y0], [x1, y1], [x2, y2]]), 4), u => 1.8 - 1.4 * u), 196 + i, 6, .15, false));
-  // 折下来的尖：从帽身顶上那道折痕往屏幕右侧软软地垂下，尖端落在帽身右边外面；折痕下面一条阴影
-  g.flopShade = cut(marTilt([[-22, -238], [0, -236], [20, -238], [36, -236], [50, -226], [58, -210], [46, -214], [30, -224], [12, -226], [-8, -226], [-24, -228]]), 198, 5, .3, false);
-  g.flop = cut(marTilt([[-22, -236], [-20, -254], [-8, -268], [12, -275], [34, -272], [54, -260], [70, -240], [80, -216], [86, -192], [89, -172], [82, -180], [72, -198], [60, -218], [46, -234], [28, -241], [6, -240]]), 199, 5, .5);
-  g.flopLit = cut(rStroke(rOpen(marTilt([[-14, -258], [6, -270], [30, -269], [50, -258], [64, -242], [74, -220]]), 4), u => 3 - 2.4 * Math.abs(2 * u - 1)), 200, 6, .1, false);
-  g.flopCrease = cut(rStroke(rOpen(marTilt([[-20, -237], [6, -239], [28, -240], [46, -232], [62, -214], [76, -190]]), 4), u => 2.6 - 1.8 * u), 201, 6, .1, false);
+  // 折点：一道阴影把塌下来的尖和帽身分开，尖的上沿一道亮边
+  g.foldShade = cut(rStroke(rOpen(marTilt([[-14, -219], [-2, -216], [12, -213], [24, -210], [34, -205], [42, -196], [47, -187]]), 4), u => 4.2 - 2.4 * u), 198, 5, .2, false);
+  g.foldLit = cut(rStroke(rOpen(marTilt([[-6, -228], [8, -231], [24, -229], [40, -221], [50, -209], [54, -196]]), 4), u => 2.2 - 1.6 * Math.abs(2 * u - 1)), 199, 6, .1, false);
   // 帽身下沿一圈白缎带（宽约 16，两端顺着帽身收窄）
   const bandB = [], bandT = []; for (let k = 0; k <= 20; k++) { const u = k / 20, x = lerp(-CR.rx + 1, CR.rx - 1, u); bandB.push([x, marCrownBase(x) - 2]);
     const xt = lerp(CR.rx - 4, -CR.rx + 4, u); bandT.push([xt, marCrownBase(xt) * 1 - 17 + 2 * (1 - (xt / CR.rx) ** 2)]); }
@@ -226,7 +225,7 @@ function marIK(sd, tx, ty, k = 1, shrug = 0) {
   return [sd * a, sd * (Math.atan2(X - ex, Y - ey) - a)];
 }
 // grin：帽子往前侧压低 MAR_TUG 弧度，前手腕到帽檐前沿右侧那一段下面（上身坐标），手指扣在帽檐边上
-const MAR_TUG = .18, MAR_TUG_WRIST = [108, -290], MAR_TUG_K = 1.7, MAR_TUG_SHRUG = 6;
+const MAR_TUG = .18, MAR_TUG_WRIST = [100, -306], MAR_TUG_K = 1.7, MAR_TUG_SHRUG = 6;
 function marPose(pose, g, tt) {
   const hipB = [-.95, 1.7, 'fist', false];
   switch (pose) {
@@ -311,7 +310,6 @@ const MAR_RIG = {
     // 帽子：grin 时绕帽檐中心往前侧压低（tug）
     { name: 'cap', parent: 'head', at: k => [k.turn * 4, 0], pivot: [0, MAR_BRIM.y], rot: k => (k.ps.tug || 0) + k.wind * -.06 },
     { name: 'capTop', parent: 'cap', pivot: [0, MAR_CROWN.y], sway: [.01, 1.2, .5], rot: k => k.wind * -.05, spring: { len: 150, dir: -Math.PI / 2, gain: .3, f: 2.2, max: .08 } },
-    { name: 'flop', parent: 'capTop', pivot: [8, -250], sway: [.025, 1.3, .8], rot: k => k.wind * -.12, spring: { len: 60, dir: 0, gain: .5, f: 2, max: .12 } },
     { name: 'hatBow', parent: 'capTop', at: [34, marCrownBase(34) - 10], rot: -.08, sway: [.02, 2.1, 0], spring: { len: 18, gain: .4, f: 3, max: .25 } },
   ],
   layers: [
@@ -370,10 +368,8 @@ const MAR_RIG = {
     { items: [['crownLit', 'capTop', 'hatLit', false]], gr: false },
     { items: [['crownFolds', 'capTop', 'hatFold', false]], gr: false },
     { items: [['crownFoldsLit', 'capTop', 'blackLite', false]], gr: false, al: .7 },
-    { items: [['flopShade', 'capTop', 'hatFold', false]], gr: false },
-    { items: [['flop', 'flop', 'hatFlop']], sh: 'mid' },
-    { items: [['flopLit', 'flop', 'hatLit', false]], gr: false },
-    { items: [['flopCrease', 'flop', 'hatFold', false]], gr: false },
+    { items: [['foldShade', 'capTop', 'hatFold', false]], gr: false },
+    { items: [['foldLit', 'capTop', 'hatLit', false]], gr: false },
     { items: [['band', 'capTop', 'ribbon']], sh: 'tiny' },
     { items: [['bandShade', 'capTop', 'ribbonKnot', false]], gr: false, al: .6 },
     { items: [['brimLipUnder', 'cap', 'hatUnder']], sh: 'mid' },

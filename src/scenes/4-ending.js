@@ -12,7 +12,7 @@ function s3Draw(c, tau, L) {
   const R = BOOK.R, s = '画面 = f ( t )';
   zh(c, s, R.x + R.w / 2, R.y + 290, { size: 96, align: 'center', color: P.ink, p: writeP(tau, .4, s, .08) });
   const k = sm(S3T(1), S3T(1) + .5, tau, easeOutBack);
-  pop(c, R.x + R.w / 2, R.y + 360, k, () => drawMoonIcon(c, R.x + R.w / 2, R.y + 360, 56, P.moon, -.5));
+  pop(c, R.x + R.w / 2 - 110, R.y + 380, k, () => drawMoonIcon(c, R.x + R.w / 2 - 110, R.y + 380, 56, P.moon, -.5));
   drawPatchouli(c, { ...STD.pch, pose: 'lecture', mood: moodOf(L, 'patchouli', 'normal'), mouth: mouthOf(L, 'patchouli'), blink: blinkAt(tau), t: tau });
   drawCirno(c, { ...STD.cir, pose: 'stand', mood: 'happy', blink: blinkAt(tau, 2), t: tau });
 }

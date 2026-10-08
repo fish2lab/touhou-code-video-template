@@ -4,7 +4,7 @@
 
 **[介绍网页](https://fish2lab.github.io/touhou-code-video-template/)** · **[92 秒演示片](https://fish2lab.github.io/touhou-code-video-template/film/)** · **[十个特效](https://fish2lab.github.io/touhou-code-video-template/highlights/)** · [教程](docs/教程.md) · [经验](docs/经验.md)
 
-![六位剪纸角色并排站立，身高统一](site/media/lineup.jpg)
+![七位 Q 版剪纸角色并排站立，头和身子一样大](site/media/lineup.jpg)
 
 出自「帕秋莉讲座」系列（[第 1 集](https://github.com/fish2lab/patchouli-lecture-1)、[第 2 集](https://github.com/fish2lab/patchouli-lecture-2)、[第 3 集](https://github.com/fish2lab/patchouli-lecture-3)）。本仓库把引擎、画具、角色和工具链抽出来，换成一段 80 秒的演示，讲的就是「这套东西怎么做」。
 

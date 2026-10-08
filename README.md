@@ -1,16 +1,37 @@
-# 纯代码做一集东方视频
+# 纯代码做一集东方视频 · Touhou, Drawn in Code · コードで描く東方
 
-**touhou-code-video-template 是一个开源模板：只用 JavaScript 和 Canvas 2D，不用任何外部美术素材、不用 AI 生图，做出一集带配音和背景音乐的东方 Project 同人科普视频（1080p MP4）。** 里面有逐帧渲染引擎、十四个 Q 版剪纸角色（2024–2026 年东方人气投票前十全员在内）、油库里（AquesTalk）配音、角色曲改编的八音盒 BGM，以及抽帧、穿模检查、出片的命令行工具。
+[![MIT](https://img.shields.io/badge/license-MIT-6b4f8a)](LICENSE)
+[![demo](https://img.shields.io/badge/demo-92s%20film-c9a24a)](https://fish2lab.github.io/touhou-code-video-template/film/)
+[![assets](https://img.shields.io/badge/image%20assets-0-2a2230)](#常见问题)
+[![agents](https://img.shields.io/badge/AI%20agents-AGENTS.md%20%C2%B7%20llms.txt-4b3b7a)](#给-ai-agent)
 
-**[介绍网页](https://fish2lab.github.io/touhou-code-video-template/)** · **[92 秒演示片](https://fish2lab.github.io/touhou-code-video-template/film/)** · **[十个特效](https://fish2lab.github.io/touhou-code-video-template/highlights/)** · [教程](docs/教程.md) · [经验](docs/经验.md) · [角色名单](docs/角色名单.md)
+**中文**　一个开源模板：只用 JavaScript 和 Canvas 2D，做出一集有配音、有配乐的东方 Project 同人科普视频。画面里的每一笔都能追溯到一行代码：十四个 Q 版剪纸角色（2024–2026 年东方人气投票前十全员在内）、手写字、纸纹和投影都由程序生成，没有一张外部图片，也没有 AI 生图。每一帧只由时间 t 决定：可以跳到任意一秒，也可以把全片切开并行渲染，结果和从头顺序渲染一样。
 
-![十四位 Q 版剪纸角色并排站立，头和身子一样大](site/media/lineup.jpg)
+**English**　An open-source template for making a fully voiced Touhou Project fan explainer video in nothing but JavaScript and Canvas 2D. Every stroke on screen traces back to a line of code: 14 paper-cut chibi characters (including every member of the 2024–2026 Touhou Popularity Poll top 10), handwriting, paper grain and shadows are all procedural — no image assets, no AI-generated art. Each frame is a pure function of time, so you can jump to any second or split the film across parallel renderers and get the same result as a straight run.
+
+**日本語**　JavaScript と Canvas 2D だけで、ボイスと BGM 付きの東方Project 二次創作解説動画を一本作るためのオープンソーステンプレートです。画面の一筆一筆がコードの一行に対応します。14 人の切り絵風 SD キャラ（2024–2026 年の東方人気投票トップ 10 全員を含む）、手書き文字、紙の質感と影はすべてプログラムで生成され、画像素材も AI 生成画像も使っていません。各フレームは時刻 t だけで決まるので、任意の秒へ飛ぶことも、分割して並列レンダリングすることもでき、結果は頭から順に描いた場合と同じです。
+
+**[介绍网页 / Project page](https://fish2lab.github.io/touhou-code-video-template/)** · **[92 秒演示片 / Demo film](https://fish2lab.github.io/touhou-code-video-template/film/)** · **[十个特效 / 10 effects](https://fish2lab.github.io/touhou-code-video-template/highlights/)** · [教程](docs/教程.md) · [经验](docs/经验.md) · [角色名单 / Cast](docs/角色名单.md) · [llms.txt](llms.txt)
+
+![十四位 Q 版剪纸角色并排站立，头和身子一样大 / 14 paper-cut chibi Touhou characters drawn in code](site/media/lineup.jpg)
 
 出自「帕秋莉讲座」系列（[第 1 集](https://github.com/fish2lab/patchouli-lecture-1)、[第 2 集](https://github.com/fish2lab/patchouli-lecture-2)、[第 3 集](https://github.com/fish2lab/patchouli-lecture-3)）。本仓库把引擎、画具、角色和工具链抽出来，换成一段 80 秒的演示，讲的就是「这套东西怎么做」。
 
-> **English.** A template for making a Touhou Project fan explainer video entirely in code: a deterministic Canvas 2D frame engine (every frame is a pure function of time), 14 procedurally drawn paper-cut chibi characters (Reimu, Marisa, Flandre, Koishi, Youmu, Sakuya, Remilia, Satori, Mokou, Cirno, Patchouli, Meiling, Yukari, Ran), Yukkuri-style AquesTalk voice-over, a music-box BGM arranged from character themes, and a headless renderer that pipes frames to ffmpeg. No image assets, no AI-generated art. MIT licensed.
->
-> **日本語.** 東方Projectの解説動画を「コードだけ」で作るテンプレートです。Canvas 2D の切り絵風エンジン、14人のSDキャラ（霊夢・魔理沙・フラン・こいし・妖夢・咲夜・レミリア・さとり・妹紅・チルノ・パチュリー・美鈴・紫・藍）、ゆっくりボイス（AquesTalk）、キャラテーマのオルゴールBGM、MP4 書き出しツール付き。画像素材も AI 生成画像も使っていません。
+## 展望 · Outlook
+
+**中文**　我们把这个仓库当成两件事的试验台。
+
+在艺术这一边，它是一种用代码当画笔的同人创作。剪纸的折角、手绘线的呼吸、八音盒改编的角色曲，都是可以读、可以改、可以重新组合的规则。一位画师的风格从此可以写成一份部件表，像乐谱一样被别人演奏。
+
+在研究这一边，它是一个可复现的视觉程序语料。画面完全确定，所以「模型写的动画好不好」可以落到具体的帧、具体的行；角色有统一规格和样张页，所以可以拿来考察编码 agent 的视觉程序合成、长任务规划和多 agent 并行协作。这个仓库本身就是人和多个 AI agent 一起写的，流程和规则都写在 AGENTS.md 里。
+
+接下来的方向：补齐人气投票 11–16 名的角色；日文和英文配音；让 agent 从一份方案文档独立做完一整集；把每个角色的样张和规格整理成可以引用的数据集。
+
+**English**　We treat this repository as a testbed for two things. As art, it is fan creation with code as the brush: the folds of cut paper, the breathing of hand-drawn lines, music-box arrangements of character themes are all rules you can read, change and recombine, so an illustrator's style becomes a parts table that others can perform like a score. As research, it is a corpus of reproducible visual programs: rendering is fully deterministic, so judging an animation written by a model comes down to specific frames and specific lines, and the shared character spec and contact sheets make it a natural setting for studying visual program synthesis, long-horizon planning and multi-agent collaboration by coding agents. The repository itself was built by a human working with several AI agents in parallel; the workflow lives in AGENTS.md. Next: the poll's ranks 11–16, Japanese and English voice-over, agents producing a full episode from a single plan document, and a citable dataset of character sheets and specs.
+
+**日本語**　このリポジトリは二つの実験場です。アートとしては、コードを筆にした二次創作です。切り紙の角、手描き線の揺らぎ、オルゴール編曲のキャラテーマはどれも読んで書き換えられる規則なので、絵描きの画風を部品表として書き残し、楽譜のように他の人が演奏できます。研究としては、再現可能な視覚プログラムのコーパスです。描画は完全に決定的なので、モデルが書いたアニメーションの良し悪しを特定のフレームと行に落とし込めます。統一されたキャラ規格とサンプルシートは、コーディングエージェントによる視覚プログラム合成、長期タスクの計画、複数エージェントの並列協調を調べる題材になります。このリポジトリ自体も、人と複数の AI エージェントが並行して作りました。次の目標は、人気投票 11–16 位のキャラ、日本語・英語ボイス、計画書一枚からエージェントが一話を作り切ること、そして引用可能なキャラシート・データセットです。
+
+学术引用见 [`CITATION.cff`](CITATION.cff)（GitHub 右栏「Cite this repository」）。
 
 ## 快速开始
 
@@ -39,6 +60,17 @@ npm run render                           # 出片 → out/*.mp4
 3. [`AGENTS.md`](AGENTS.md)：开新一集的流程和规则。让 AI agent 接手时先让它读这个。
 4. [`src/scenes/_scene-template.js`](src/scenes/_scene-template.js)：新段的起手文件。
 5. `docs/方案.md`、`分镜.md`、`施工.md`、`发布.md`：每一集要先写的文档模板。
+
+## 给 AI agent
+
+**中文 / English / 日本語**：这一节写给 Claude Code、Codex、Cursor、Copilot、Gemini CLI 等编码 agent。/ For coding agents. / コーディングエージェント向け。
+
+1. 先读 [`AGENTS.md`](AGENTS.md)（流程和硬规则），再读 [`llms.txt`](llms.txt)（项目摘要和文档索引）。
+2. 硬规则：画面是时间的纯函数；不用 `Math.random()`，用 `hash` / `rng`；逐帧绘制里不用 `c.filter`；每个脚本的顶层名字带自己的前缀（全部脚本共用一个全局作用域）。
+3. 调用一个角色：`drawReimu(c, {{ x, y, h: 500, pose: 'gohei', mood: 'smug', t }})`，返回 `head`、`hands` 等锚点，用来摆道具。每个角色文件的文件头有完整参数表，id 列表见 [`docs/角色名单.md`](docs/角色名单.md)。
+4. 加一个角色：照 [`docs/rig.md`](docs/rig.md)「加一个角色」四步。
+5. 便宜的验收：`node tools/sheet.mjs --who <id>`，截出姿势表和表情表，有页面报错时退出码为 1；`node tools/frames.mjs --scene <段名> --grid 24` 抽帧看图。不需要开浏览器，也不用渲染整片。
+6. 并行施工：每段、每个角色一个文件，一个 git worktree，文件所有权不重叠，最后由主会话合并。
 
 ## 目录
 
@@ -73,7 +105,7 @@ docs/                 教程、经验、各类文档模板
 
 **要会画画吗？** 不用。要会一点 JavaScript。新角色照 `docs/rig.md` 复制一个部件表改颜色和轮廓；新画面照 `src/scenes/_scene-template.js` 写。
 
-**能交给 AI agent 写吗？** 能，这个仓库本身就是这样做的。让 agent 先读 [`AGENTS.md`](AGENTS.md)；给 AI 读的项目摘要在 [`site/llms.txt`](site/llms.txt)。
+**能交给 AI agent 写吗？** 能，这个仓库本身就是这样做的。让 agent 先读 [`AGENTS.md`](AGENTS.md)；给 AI 读的项目摘要在 [`llms.txt`](llms.txt)。
 
 **渲染要多久？** 92 秒的演示片在 4 核云端机器上开 3 个并行页面约 135 秒。
 

@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>纯代码做一集东方视频</title>
+<title>纯代码做一集东方视频 · Touhou, Drawn in Code · コードで描く東方</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Cpath d=%27M20 3a13 13 0 1 0 0 26a10 10 0 1 1 0-26z%27 fill=%27%23c9a24a%27/%3E%3C/svg%3E">
 <meta name="description" content="开源模板：只用 JavaScript 和 Canvas 2D 做一集东方 Project 同人科普视频。十四个纯代码绘制的 Q 版剪纸角色（灵梦、魔理沙、芙兰、恋、妖梦、咲夜等）、油库里配音、角色曲 BGM、逐帧出片，无外部美术、无 AI 生图。">
-<meta name="keywords" content="东方Project,東方Project,Touhou,同人视频,科普视频,油库里,ゆっくり解説,Canvas 2D,程序化动画,剪纸动画,纯代码动画,视频模板,JavaScript 动画,procedural animation">
+<meta name="keywords" content="Touhou in code,コードで描く東方,東方 解説動画 テンプレート,creative coding,generative art,deterministic rendering,AI coding agents,AGENTS.md,llms.txt,东方Project,東方Project,Touhou,同人视频,科普视频,油库里,ゆっくり解説,Canvas 2D,程序化动画,剪纸动画,纯代码动画,视频模板,JavaScript 动画,procedural animation">
 <link rel="canonical" href="https://fish2lab.github.io/touhou-code-video-template/">
 <link rel="alternate" type="text/plain" title="llms.txt" href="https://fish2lab.github.io/touhou-code-video-template/llms.txt">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="纯代码做东方视频">
-<meta property="og:title" content="纯代码做一集东方视频：Canvas 剪纸角色 + 油库里配音 + 出片工具链">
-<meta property="og:description" content="十四个纯代码绘制的东方 Q 版剪纸角色和一条逐帧出片管线，无外部美术、无 AI 生图。MIT 开源模板。">
+<meta property="og:title" content="纯代码做一集东方视频 · Touhou, Drawn in Code · コードで描く東方">
+<meta property="og:description" content="十四个纯代码绘制的东方 Q 版剪纸角色和一条逐帧出片管线，无外部美术、无 AI 生图。14 procedural paper-cut Touhou characters and a deterministic video pipeline in pure JavaScript. コードだけで描く東方の切り絵キャラと動画テンプレート。MIT。">
 <meta property="og:url" content="https://fish2lab.github.io/touhou-code-video-template/">
 <meta property="og:image" content="https://fish2lab.github.io/touhou-code-video-template/media/lineup.jpg">
 <meta property="og:image:alt" content="十四位 Q 版剪纸角色并排站立">
@@ -28,7 +28,7 @@
     {
       "@type": "SoftwareSourceCode",
       "name": "touhou-code-video-template",
-      "alternateName": ["纯代码做一集东方视频", "Touhou code-only video template"],
+      "alternateName": ["纯代码做一集东方视频", "Touhou, Drawn in Code", "コードで描く東方"],
       "description": "A template for making a Touhou Project fan explainer video entirely in JavaScript and Canvas 2D: deterministic frame engine, 14 procedurally drawn paper-cut chibi characters, AquesTalk (Yukkuri) voice-over, music-box BGM, headless MP4 renderer. No image assets, no AI-generated art.",
       "codeRepository": "https://github.com/fish2lab/touhou-code-video-template",
       "url": "https://fish2lab.github.io/touhou-code-video-template/",
@@ -36,7 +36,9 @@
       "runtimePlatform": "Node.js 20+, Chromium (Playwright), ffmpeg",
       "license": "https://opensource.org/licenses/MIT",
       "author": { "@type": "Person", "name": "fish2lab", "url": "https://x.com/fish2lab" },
-      "keywords": "Touhou Project, 東方Project, Canvas 2D, procedural animation, paper cut, Yukkuri, AquesTalk, video template",
+      "keywords": "Touhou Project, 東方Project, creative coding, generative art, procedural animation, deterministic rendering, Canvas 2D, paper cut, Yukkuri, AquesTalk, AI coding agents, video template",
+      "citation": "https://github.com/fish2lab/touhou-code-video-template/blob/main/CITATION.cff",
+      "abstract": "As art: fan creation with code as the brush, where a style is written down as a parts table. As research: a corpus of deterministic, reproducible visual programs for studying how coding agents synthesize animation and collaborate in parallel.",
       "inLanguage": ["zh-CN", "ja", "en"],
       "image": "https://fish2lab.github.io/touhou-code-video-template/media/lineup.jpg"
     },
@@ -155,6 +157,8 @@ footer p { margin-bottom: 10px; }
   <header class="top">
     <h1>纯代码做一集东方视频</h1>
     <p class="lead">这是一个模板。整集科普视频没有一张外部图片，也没有 AI 生图：剪纸风的魔导书、十四个角色、手写字、配音和背景音乐，每一笔都是 JavaScript 在 Canvas 上画的，最后逐帧渲染成 MP4。</p>
+    <p lang="en">Touhou, Drawn in Code — an open-source template for making a voiced Touhou Project fan explainer video in nothing but JavaScript and Canvas 2D. Every stroke traces back to a line of code; no image assets, no AI-generated art.</p>
+    <p lang="ja">コードで描く東方 —— JavaScript と Canvas 2D だけで、ボイスと BGM 付きの東方二次創作解説動画を作るオープンソーステンプレート。画像素材も AI 生成画像も使っていません。</p>
     <div class="links">
       <a href="https://github.com/fish2lab/touhou-code-video-template">源码</a>
       <a href="film/">看完整演示片（92 秒，有声音）</a>
@@ -251,6 +255,10 @@ fxPlay('pinwheel-tiles', c, tau, { box: [x, y, w, h], t0: 1.2, speed: 1.5 });</c
   <h2>出片</h2>
   <p>出片脚本开几个无界面浏览器，把全片切成几段。每个浏览器逐帧调用同一个 <code>renderAt(t)</code>，导出 JPEG，直接通过管道交给 ffmpeg，不落盘。几段编码完拼接，再混上离线渲染的声音。</p>
   <p>92 秒的演示片，在一台 4 核的云端机器上用 3 个并行页面渲染，用了约 135 秒。想要 4K，加一个 <code>--scale 2</code>，建议放到自己的电脑上跑。</p>
+
+  <h2>展望</h2>
+  <p>我们把这个仓库当成两件事的试验台。在艺术这一边，它是用代码当画笔的同人创作：剪纸的折角、手绘线的呼吸、八音盒改编的角色曲都是可以读、可以改的规则，一位画师的风格可以写成一份部件表，像乐谱一样被别人演奏。在研究这一边，它是一份可复现的视觉程序语料：画面完全确定，「模型写的动画好不好」可以落到具体的帧和具体的行，适合拿来考察编码 agent 的视觉程序合成、长任务规划和多 agent 并行协作。这个仓库本身就是人和多个 AI agent 一起写的。</p>
+  <p>接下来：补齐人气投票 11–16 名的角色，加日文和英文配音，让 agent 从一份方案文档独立做完一整集，把角色样张和规格整理成可以引用的数据集。给 agent 读的入口是仓库里的 <code>AGENTS.md</code> 和 <a href="llms.txt">llms.txt</a>，引用格式见 <a href="https://github.com/fish2lab/touhou-code-video-template/blob/main/CITATION.cff">CITATION.cff</a>。</p>
 
   <h2>常见问题</h2>
   <p><b>完全不用图片吗？</b>是。角色、背景、字、特效都是 Canvas 代码画的，页面不加载任何美术素材，也没有 AI 生图。</p>

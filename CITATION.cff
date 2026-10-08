@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this template, its characters or its rendering pipeline in research or creative work, please cite it as below."
+title: "Touhou, Drawn in Code: a template for making a voiced Touhou Project fan explainer video in pure JavaScript and Canvas 2D"
+abstract: "An open-source template that produces a fully voiced fan explainer video with no image assets and no AI-generated art. A deterministic Canvas 2D frame engine renders each frame as a pure function of time; 14 procedurally drawn paper-cut chibi characters share one specification; voice-over is synthesized with AquesTalk and music is arranged from character themes; a headless renderer pipes frames to ffmpeg."
+type: software
+authors:
+  - alias: fish2lab
+    website: "https://x.com/fish2lab"
+repository-code: "https://github.com/fish2lab/touhou-code-video-template"
+url: "https://fish2lab.github.io/touhou-code-video-template/"
+license: MIT
+version: 0.1.0
+date-released: "2026-10-04"
+keywords:
+  - Touhou Project
+  - creative coding
+  - procedural animation
+  - generative art
+  - Canvas 2D
+  - deterministic rendering
+  - paper cut
+  - AI coding agents

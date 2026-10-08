@@ -53,6 +53,7 @@ jobs:
         run: |
           mkdir -p _site/film _site/highlights
           cp -r site/. _site/
+          cp llms.txt _site/llms.txt
           cp dist/index.html _site/film/index.html
           cp docs/亮点.html _site/highlights/index.html
           cp -r docs/fx _site/highlights/fx

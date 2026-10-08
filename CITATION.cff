@@ -10,7 +10,7 @@ repository-code: "https://github.com/fish2lab/touhou-code-video-template"
 url: "https://fish2lab.github.io/touhou-code-video-template/"
 license: MIT
 version: 0.1.0
-date-released: "2026-10-04"
+date-released: "2026-10-08"
 keywords:
   - Touhou Project
   - creative coding

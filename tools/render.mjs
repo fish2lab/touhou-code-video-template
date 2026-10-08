@@ -1,4 +1,4 @@
-// 出片：逐帧取图交给 ffmpeg，配上离线混好的油库里语音和背景音乐 → out/patchouli-lecture-3.mp4（1920×1080，30fps，H.264 + AAC）
+// 出片：逐帧取图交给 ffmpeg，配上离线混好的油库里语音和背景音乐 → out/touhou-code-video-template.mp4（1920×1080，30fps，H.264 + AAC）
 //   node tools/render.mjs [--jobs 4] [--scale 1] [--out out/xxx.mp4] [--from 0 --to 20]
 // ffmpeg：优先用 PATH 里的，没有就用 FFMPEG 环境变量。
 import { mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
@@ -6,7 +6,7 @@ import { spawn, execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { openFilm, ROOT } from './browser.mjs';
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i < 0 ? d : process.argv[i + 1]; };
-const jobs = +arg('jobs', 4), scale = +arg('scale', 1), out = resolve(ROOT, arg('out', 'out/patchouli-lecture-3.mp4'));
+const jobs = +arg('jobs', 4), scale = +arg('scale', 1), out = resolve(ROOT, arg('out', 'out/touhou-code-video-template.mp4'));
 const FF = process.env.FFMPEG || 'ffmpeg';
 try { execFileSync(FF, ['-version'], { stdio: 'ignore' }); } catch { console.error('找不到 ffmpeg（设 FFMPEG=路径）'); process.exit(2); }
 const tmp = resolve(ROOT, 'out/render-tmp'); rmSync(tmp, { recursive: true, force: true }); mkdirSync(tmp, { recursive: true });

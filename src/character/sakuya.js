@@ -48,8 +48,10 @@ const SAK_K = (() => {
 const SAK_CUT = rigCutter(11000);
 // 身子坐标：脖子 -212、腰 -180；root 乘 SAK_BODY（脖子落在 -248），头再乘 SAK_HEAD（合起来 1.2）
 const SAK_BODY = 1.17, SAK_NECK = -212, SAK_WAIST = -180, SAK_HEAD = 1.2 / SAK_BODY, SAK_SH = [28, -200], SAK_UP = 36, SAK_FORE = 36;
-// 头饰那道弧（头坐标）：贴着头顶戴的荷叶边发箍，正面看是一道拱：正中 -164，两端（x = ±70）低到 -120，藏进鬓发
-const sakBand = x => -164 + 44 * (x / 70) ** 2;
+// 头饰那道弧（头坐标）：戴在头顶偏前的荷叶边发箍，正面看是一道拱：正中 -160，两端（x = ±68）低到 -140（比头顶的圆弧平，正中立出头发、两端收进头发），藏进鬓发
+const sakBand = x => -160 + 20 * (x / 68) ** 2;
+// 二次曲线取点（不含起点）：刘海每一绺是弯的尖叶，两条边都用它画
+const sakQ = (p0, q, p1, n = 5) => Array.from({ length: n }, (_, i) => { const u = (i + 1) / n, v = 1 - u; return [v * v * p0[0] + 2 * u * v * q[0] + u * u * p1[0], v * v * p0[1] + 2 * u * v * q[1] + u * u * p1[1]]; });
 // 手：Q 版手比 RIG_SHAPES 的胖一圈（宽 ×1.4），指尖点不变（同八云紫）
 const sakHandPts = pts => pts.map(([x, y]) => [x * 1.4, y]);
 const SAK_FAN = [-.56, 0, .56];   // 指间三把刀的张角
@@ -120,13 +122,22 @@ const SAK_G = (() => {
   // ---- 头（头坐标：脖子关节为原点；下巴 (0,-4)，头顶 -150） ----
   // 圆脸：两颊鼓、下巴小（和帕秋莉同一张脸型，全员统一）
   g.face = cut([[0, -4], [13, -6], [29, -13], [45, -27], [57, -46], [63, -70], [64, -98], [59, -124], [42, -142], [0, -150], [-42, -142], [-59, -124], [-64, -98], [-63, -70], [-57, -46], [-45, -27], [-29, -13], [-13, -6]], 100, 7, .5);
-  // 后发：银白短发，比脸宽一圈，后颈和两侧到下巴下面，发梢剪成几道尖
-  const bSide = rOpen([[0, -180], [42, -174], [66, -152], [75, -118], [77, -84], [75, -56], [73, -36]], 5);
-  const bTips = [[70, -24], [62, -36], [54, -26], [42, -34], [28, -26], [14, -32], [0, -26]];
-  g.backHair = cut([...bSide, ...bTips, ...rMirror([...bSide, ...bTips.slice(0, -1)])], 101, 8, .7, false);
-  // 鬓发：从头饰下面垂到下巴，压在脸的两颊外缘（盖住辫根；上端被发箍两端压住）
-  const lockR = [...rOpen([[48, -128], [65, -118], [72, -98], [74, -66], [72, -40]], 4), [71, -14], [64, -30], [60, -16], [56, -38], ...rOpen([[57, -62], [57, -92], [52, -118]], 4)];
-  g.lockR = cut(lockR, 102, 6, .5, false); g.lockL = cut(rMirror(lockR), 103, 6, .5, false);
+  // 后发（返修二）：短 bob 的蓬松外轮廓——头顶到耳朵外侧一道饱满的圆弧，下巴高度往里收成三束内卷的弯尖；
+  // 右边短、左边长一点（dy），不对称。sd = 1 画右半边（从头顶往下到后颈正中），左半边镜像后反向接上。
+  const bobSide = (sd, dy) => {
+    const arc = Array.from({ length: 9 }, (_, i) => { const a = Math.PI / 2 - i / 8 * Math.PI * .62; return [sd * 79 * Math.cos(a), -110 - 62 * Math.sin(a)]; });
+    return [...rOpen([...arc.slice(0, -1), [sd * 78, -84], [sd * 75, -60], [sd * 74, -46 + dy * .5]], 4),
+      ...sakQ([sd * 74, -46 + dy * .5], [sd * 76, -24 + dy], [sd * 66, -18 + dy], 4), ...sakQ([sd * 66, -18 + dy], [sd * 68, -30 + dy], [sd * 64, -38 + dy], 3),
+      ...sakQ([sd * 64, -38 + dy], [sd * 62, -22 + dy], [sd * 52, -20 + dy], 4), ...sakQ([sd * 52, -24 + dy], [sd * 54, -32 + dy], [sd * 46, -36 + dy], 3),
+      ...sakQ([sd * 46, -36 + dy], [sd * 40, -24 + dy], [sd * 28, -26 + dy], 4), [sd * 14, -30], [0, -28]];
+  };
+  g.backHair = cut([...bobSide(1, 0), ...bobSide(-1, 7).reverse().slice(1, -1)], 101, 8, .7, false);
+  // 鬓发（返修二）：外缘是一道鼓出去的圆弧（贴着后发的 bob），下端在下巴高度内卷成两束弯尖，轻轻包住脸颊；左边长一点
+  const lockPts = (sd, dy) => [[sd * 48, -128], ...rOpen([[sd * 48, -128], [sd * 68, -118], [sd * 79, -96], [sd * 79, -72], [sd * 70, -46 + dy * .5]], 4).slice(1),
+    ...sakQ([sd * 70, -46 + dy * .5], [sd * 68, -26 + dy], [sd * 56, -20 + dy], 4), ...sakQ([sd * 56, -20 + dy], [sd * 62, -30 + dy], [sd * 61, -40 + dy], 3),
+    ...sakQ([sd * 61, -40 + dy], [sd * 58, -30 + dy], [sd * 50, -28 + dy], 4), ...sakQ([sd * 50, -28 + dy], [sd * 56, -44 + dy * .5], [sd * 57, -62], 4),
+    ...rOpen([[sd * 57, -62], [sd * 58, -92], [sd * 52, -118]], 4).slice(1)];
+  g.lockR = cut(lockPts(1, 0), 102, 6, .5, false); g.lockL = cut(lockPts(-1, 6), 103, 6, .5, false);
   // 细麻花辫（辫根为原点，朝 +y 垂下）：一节一节的锯齿 + 斜纹，辫梢在胸口高度系绿色小蝴蝶结，下面再垂一撮发尾
   const bl = [], br = []; for (let i = 0; i <= 7; i++) { const y = i * 7.4, w = 3.9 - i * .08; bl.push([-w - (i % 2) * 1.3, y]); br.unshift([w + ((i + 1) % 2) * 1.3, y]); }
   g.braid = cut([...bl, [0, 55], ...br], 104, 4, .2, false);
@@ -134,19 +145,35 @@ const SAK_G = (() => {
   g.tuft = cut([[-3.6, 52], [3.6, 52], [5.2, 62], [6.6, 72], [2.4, 67], [0, 77], [-2.4, 67], [-6.6, 72], [-5.2, 62]], 113, 3, .2, false);
   g.braidBow = cut(RIG_SHAPES.bow.map(([x, y]) => [x * .78, y * .72 + 53]), 114, 3, .2, false);
   g.braidKnot = cut(ellPts(0, 52.6, 2.2, 2.4, 8), 115, 2, .05, false);
-  // 头顶 + 刘海：一整片罩住头顶（没有帽子，头顶就是头发），下缘一排尖压到眼睛上沿，正中一绺垂到两眼之间
-  g.bangs = cut([[-73, -122], [-71, -150], [-56, -170], [-30, -182], [0, -185], [30, -182], [56, -170], [71, -150], [73, -122],
-    [69, -106], [65, -80], [57, -97], [49, -75], [40, -95], [30, -78], [20, -97], [10, -80], [4, -100], [0, -73], [-4, -100], [-10, -80], [-20, -97], [-30, -78], [-40, -95], [-49, -75], [-57, -97], [-65, -80], [-69, -106]], 116, 6, .5, false);
-  g.bangLines = [[30, -78, 32, -128], [10, -80, 8, -132], [0, -73, 1, -120], [-10, -80, -8, -132], [-30, -78, -32, -128], [49, -75, 55, -118], [-49, -75, -55, -118]].map(([x0, y0, x1, y1], i) => cut([[x0 - .9, y0], [x1 - 1.6, y1], [x1 + 1.6, y1], [x0 + .9, y0]], 117 + i, 8, .2, false));
-  g.crownLines = [-40, -14, 14, 40].map((x, i) => cut(rStroke([[x * .7, -178 + Math.abs(x) * .05], [x * 1.08, sakBand(x * 1.08) + 7]], u => 1.6 - .8 * u), 125 + i, 6, .1, false));
-  // 女仆头饰（第三版，按美术意见）：贴着头顶戴的发箍，正面看是一道拱（sakBand），两端藏进鬓发；
-  // 上沿一圈荷叶边往上翘、贴着头顶的弧，下面一道细发箍。整片顺着头往下包，不浮在头顶。
-  const frTop = rScallop(u => { const x = lerp(-72, 72, u); return [x, sakBand(x) - 9 - 2 * (x / 72) ** 2]; }, 12, 3.6);
-  const frBot = []; for (let k = 0; k <= 16; k++) { const x = lerp(74, -74, k / 16); frBot.push([x, sakBand(x) + 2]); }
+  // 头顶 + 刘海（返修：去掉头盔感）：头顶一道贴头的圆弧（左上、右侧各翘出一小撮），刘海在 x = 24 处斜分：
+  // 分缝左边三绺长发弯着斜跨额头、最长一绺尖落在左眼内眼角；右边两绺短的往外撇，露出一角额头。整片不对称。
+  const crown = (() => { const pts = Array.from({ length: 17 }, (_, i) => { const a = Math.PI - i / 16 * Math.PI; return [77 * Math.cos(a), -112 - 60 * Math.sin(a)]; });
+    return [...pts.slice(0, -1), [78, -121], [83, -116], [74, -112], [72, -110]]; })();
+  const PART = [24, -117];
+  const fringe = [
+    ...sakQ([72, -110], [75, -95], [68, -79]), ...sakQ([68, -79], [60, -88], [54, -102], 4),       // 右二：短，往外撇
+    ...sakQ([54, -102], [54, -90], [47, -79], 4), ...sakQ([47, -79], [31, -89], PART),            // 右一：短，尖在右眼上方
+    ...sakQ(PART, [6, -78], [-18, -59], 7), ...sakQ([-18, -59], [-12, -78], [-6, -95], 4),          // 左一：最长，斜跨额头到左眼内角
+    ...sakQ([-6, -95], [-20, -76], [-43, -67], 6), ...sakQ([-43, -67], [-37, -84], [-32, -100], 4),  // 左二：尖压在左眼外上方
+    ...sakQ([-32, -100], [-48, -84], [-63, -73], 5), ...sakQ([-63, -73], [-62, -92], [-72, -110], 4), // 左三：贴着鬓角
+  ];
+  g.bangs = cut([...crown.slice(0, -1), ...fringe.slice(0, -1)], 116, 6, .5, false);
+  // 发丝线：顺着每一绺弯下去（细纸条），头顶两道从发旋往两边散
+  const strand = (pts, w, i) => cut(rStroke(pts, u => w * (1 - .7 * u)), 117 + i, 6, .1, false);
+  g.bangLines = [
+    strand(sakQ([18, -132], [2, -94], [-12, -66], 6), 1.5, 0), strand(sakQ([8, -136], [-14, -100], [-36, -73], 6), 1.4, 1),
+    strand(sakQ([-12, -138], [-34, -108], [-56, -79], 6), 1.3, 2), strand(sakQ([32, -132], [40, -104], [45, -84], 5), 1.3, 3),
+    strand(sakQ([50, -136], [60, -110], [65, -84], 5), 1.2, 4),
+  ];
+  g.crownLines = [strand(sakQ([18, -174], [-14, -172], [-40, -160], 5), 1.2, 6), strand(sakQ([26, -173], [48, -166], [60, -152], 4), 1.1, 7)];
+  // 女仆头饰（返修）：头顶偏前的一道细发箍（sakBand），上面立着一圈白色荷叶边，像褶边王冠竖在头发上，两端变矮、藏进鬓发。
+  const frTop = rScallop(u => { const x = lerp(-66, 66, u); return [x, sakBand(x) - 19 + 17 * (x / 66) ** 2]; }, 13, 4);
+  const frBot = []; for (let k = 0; k <= 16; k++) { const x = lerp(68, -68, k / 16); frBot.push([x, sakBand(x) + 2]); }
   g.frill = cut([...frTop, ...frBot], 130, 4, .4, false);
-  const bandL = []; for (let k = 0; k <= 16; k++) { const x = lerp(-73, 73, k / 16); bandL.push([x, sakBand(x) + 2.5]); }
+  const bandL = []; for (let k = 0; k <= 16; k++) { const x = lerp(-72, 72, k / 16); bandL.push([x, sakBand(x) + 2.5]); }
   g.hairband = cut(rStroke(bandL, 3.4), 131, 6, .15, false);
-  g.frillPleats = [-50, -25, 0, 25, 50].map((x, i) => cut([[x - .6, sakBand(x) - 1], [x + .6, sakBand(x) - 1], [x * 1.04 + .5, sakBand(x) - 8], [x * 1.04 - .5, sakBand(x) - 8]], 132 + i, 4, .05, false));
+  g.frillPleats = Array.from({ length: 12 }, (_, i) => { const x = -60 + i * (120 / 11) + 5, hgt = 16 - 14 * (x / 66) ** 2;
+    return cut([[x - .8, sakBand(x) - 1], [x + .8, sakBand(x) - 1], [x * 1.04 + .4, sakBand(x) - hgt], [x * 1.04 - .4, sakBand(x) - hgt]], 150 + i, 4, .05, false); });
   // 表情道具：汗滴
   g.sweat = cut(RIG_SHAPES.sweat.map(([x, y]) => [x * 1.3, y * 1.3]), 140, 3, .2);
   return g;
@@ -154,15 +181,15 @@ const SAK_G = (() => {
 
 // ===================== 表情 =====================
 // lid 眼睑压下的比例，lidTilt 眼睑外端下垂（负：外端上挑），lower 下眼睑托起，es 眼睛大小，iris 虹膜大小，brow [上移, 内端下压角]，chin 下巴抬（负），sweat 冷汗
-// 咲夜的眼神：冷静，眼睑压下三成、外端略挑；营业微笑是眯眼
+// 咲夜的眼神（返修）：眼睛偏细长（face.ry 比别人小一点）、外眼角上挑（lidTilt 负）、下眼睑略抬；normal 是冷静里带一点自信的浅笑，头微歪
 const SAK_MOODS = {
-  normal: { eye: 'open', lid: .3, lidTilt: -.04, es: 1, brow: [0, .04], mouth: 'flat', blush: .8 },
-  smile: { eye: 'up', brow: [3, -.1], mouth: 'smile', blush: 1.15, chin: -.03 },
-  smug: { eye: 'open', lid: .48, lidTilt: -.06, lower: 3, es: 1, brow: [2, .08], mouth: 'smirk', blush: .85, chin: -.12 },
-  surprised: { eye: 'open', lid: 0, es: 1.1, iris: .74, brow: [7, -.12], mouth: 'o', blush: .9 },
-  annoyed: { eye: 'open', lid: .52, lidTilt: 0, es: 1, brow: [-1, .34], mouth: 'wave', blush: .8 },
-  sleepy: { eye: 'open', lid: .66, lidTilt: .1, es: 1, brow: [-1, -.1], mouth: 'flat', blush: .9, lookY: 1.5 },
-  flustered: { eye: 'open', lid: .06, lidTilt: .06, es: 1.05, iris: .8, brow: [4, -.3], mouth: 'wobble', blush: 1.75, sweat: true },
+  normal: { eye: 'open', lid: .2, lidTilt: -.2, lower: 2.2, es: 1, brow: [1, .1], mouth: 'poise', blush: .75, tilt: .07 },
+  smile: { eye: 'open', lid: .16, lidTilt: -.14, lower: 6.5, es: 1, brow: [3, -.04], mouth: 'smile', blush: 1.1, chin: -.03, tilt: .09 },
+  smug: { eye: 'open', lid: .42, lidTilt: -.22, lower: 3.5, es: 1, brow: [2, .14], mouth: 'smirk', blush: .8, chin: -.1 },
+  surprised: { eye: 'open', lid: 0, es: 1.12, iris: .74, brow: [7, -.12], mouth: 'o', blush: .9 },
+  annoyed: { eye: 'open', lid: .44, lidTilt: -.1, lower: 2, es: 1, brow: [-1, .36], mouth: 'wave', blush: .8, tilt: -.04 },
+  sleepy: { eye: 'open', lid: .62, lidTilt: .06, es: 1, brow: [-1, -.1], mouth: 'flat', blush: .9, lookY: 1.5, tilt: .1 },
+  flustered: { eye: 'open', lid: .04, lidTilt: .04, es: 1.08, iris: .8, brow: [4, -.3], mouth: 'wobble', blush: 1.75, sweat: true },
 };
 const SAK_MOOD_ALIAS = { happy: 'smile', proud: 'smug', smirk: 'smug', confused: 'surprised', panic: 'flustered', cry: 'flustered', awkward: 'flustered', pout: 'annoyed', angry: 'annoyed', sad: 'annoyed', tired: 'sleepy', yawn: 'sleepy', calm: 'normal' };
 const SAK_POSE_ALIAS = { lecture: 'point', cheer: 'knives', proud: 'knives', fight: 'knives', attack: 'throw', hold: 'tray', lift: 'tray', give: 'tray', hand: 'tray', present: 'tray', read: 'watch', think: 'watch',
@@ -170,7 +197,10 @@ const SAK_POSE_ALIAS = { lecture: 'point', cheer: 'knives', proud: 'knives', fig
 // 嘴：大笑、露齿笑、o 用琪露诺的，其余用帕秋莉的；Q 版脸大，整体放大 1.3 倍（同八云紫）
 const SAK_CIR_MOUTHS = new Set(['laugh', 'smile', 'wail', 'grin', 'o']);
 const sakScale = pts => pts && pts.map(([x, y]) => [x * 1.3, y * 1.3]);
+// 咲夜自己的嘴：poise 冷静浅笑（一条细线，右嘴角略挑）
+const SAK_MOUTHS = { poise: [[-4.6, -.6], [-1.5, .5], [1.8, .4], [4.4, -1], [5.4, -2.6], [5.2, -.4], [2.2, 1.6], [-1.6, 1.7], [-4.4, .4]] };
 function sakMouthPts(type, open) {
+  if (SAK_MOUTHS[type]) return [sakScale(SAK_MOUTHS[type]), 'mouth', null];
   const [pts, col, tg] = (SAK_CIR_MOUTHS.has(type) ? cirMouthPts : pchMouthPts)(type, open);
   return [sakScale(pts), col === PCH_K.mouthIn || col === CIR_K.mouthIn ? 'mouthIn' : 'mouth', sakScale(tg)];
 }
@@ -193,8 +223,8 @@ function sakPose(pose, g, tt) {
     case 'watch': return { back: hipB, front: [...sakIK(1, 44, -196, true), 'grip', 'late'], grip: 'watch', hr: .08, turn: .18, look: .35, lookY: 3.5 };
     case 'tray': return { back: hipB, front: [...sakIK(1, 66, -214, true), 'open', 'late'], tray: true, hr: -.03, turn: .2, look: .3 };
     case 'point': return { back: hipB, front: [lerp(1.35, 1.9, g), lerp(.25, -.05, g), 'point', false, lerp(1, 1.12, g), lerp(1, 1.12, g)], hr: .04, turn: .3, look: .6, lean: .03 * g };
-    // 端庄：两只手交叠在身前（前手压在后手上）
-    default: return { back: [...sakIK(-1, 5, -168), 'open', false], front: [...sakIK(1, -1, -170), 'open', false], hr: .03, turn: .12, look: .1 };
+    // 端庄（返修：不再立正）：后手垂在腰前，前手抬到胸前（领结下面），上身略往后手那边斜
+    default: return { back: [...sakIK(-1, 6, -166), 'open', false], front: [...sakIK(1, 8, -186, true), 'fist', false], lean: -.035, hr: .05, turn: .14, look: .15 };
   }
 }
 
@@ -230,7 +260,7 @@ const SAK_RIG = {
   idleGesture: tt => .6 + .3 * Math.sin(tt * 1.2),
   headSway: [.012, .9, 1],
   // 五官（头坐标，和帕秋莉同一套：眼睛 (±28,-54)、rx 13 ry 16，乘 1.2 后落到规格的位置）
-  face: { style: 'layered', ex: 28, ey: -54, far: .28, turnX: 12, rx: 13, ry: 16, lookX: 3.4, mouthY: -24, mouthTurn: 13,
+  face: { style: 'layered', ex: 28, ey: -54, far: .28, turnX: 12, rx: 13.6, ry: 14.2, lookX: 3.4, mouthY: -24, mouthTurn: 13,
     blush: { dx: 14, turn: 1, y: -30, bump: 1, rx: 10, ry: 5, hatch: true }, brow: { x: 28, y: -86, len: 8.5, seed: 298, th: [1.6, 1.4, .2, 1.1, 1.6] } },
   arm: { parent: 'ug', shoulder: SAK_SH, upper: SAK_UP, fore: SAK_FORE, mirrorHand: true, tips: RIG_SHAPES.handTip,
     hands: { open: 'handOpen', fist: 'handFist', point: 'handPoint', grip: 'handGrip' } },
@@ -308,13 +338,14 @@ const SAK_RIG = {
     { items: [['braidLines', 'braidL', 'hairLine', false], ['braidLines', 'braidR', 'hairLine', false]], gr: false },
     { items: [['braidBow', 'braidL', 'green'], ['braidBow', 'braidR', 'green']], sh: 'tiny', gr: false },
     { items: [['braidKnot', 'braidL', 'greenDeep'], ['braidKnot', 'braidR', 'greenDeep']], gr: false },
+    // 眉毛压在刘海下面（左眉被斜刘海遮住一半，右眉从露出的额头上看得见）
+    { call: 'brows' },
     { items: [['bangs', 'bangs', 'hair']], sh: 'mid' },
     { items: [['bangLines', 'bangs', 'hairLine', false], ['crownLines', 'bangs', 'hairLine', false]], gr: false },
     { items: [['lockL', 'lockL', 'hair'], ['lockR', 'lockR', 'hair']], sh: 'mid' },
     { items: [['hairband', 'band', 'hairBack']], gr: false },
     { items: [['frill', 'band', 'frill']], sh: 'tiny' },
     { items: [['frillPleats', 'band', 'apronFold', false]], gr: false },
-    { call: 'brows' },
     // 前手画在头发外面的姿势（knives、watch、tray）：手臂 → 拿着的东西 → 握着的手指
     ...sakArms(A => A.flag === 'late'),
     // 举起来的怀表压在前臂前面，握着的手指再扣到表边上

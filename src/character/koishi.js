@@ -1,5 +1,5 @@
 'use strict';
-// 古明地恋（こいし）—— 剪纸人偶的部件表（觉的妹妹：浅苔绿微卷短发、黑色圆顶帽配黄缎带、黄色宽袖上衣、墨绿印花裙、闭着的第三只眼）。
+// 古明地恋（こいし）—— 剪纸人偶的部件表（觉的妹妹：浅苔绿微卷短发、黑色圆顶礼帽配黄缎带和大蝴蝶结、黄色宽袖上衣、墨绿印花裙、闭着的第三只眼）。
 // 第三版：Q 版约 2.4 头身、分层眼睛、深色描边，比例照帕秋莉（规格见 docs/rig.md「统一比例（第三版）」「画法规则（第三版）」）。
 // 画法全在 src/rig.js，本文件只有数据：颜色、部件轮廓、表情表、姿势表、骨头表、图层表，外加第三只眼、软管、帽子亮面、玫瑰几个自画层。
 // 第三只眼和软管的写法照抄姐姐（src/character/satori.js），改名、改色、改成两根缠在手臂上的软管。
@@ -31,14 +31,14 @@
 
 // ===================== 颜色（压暗、低饱和；只有第三只眼、缎带、玫瑰带一点饱和色） =====================
 const KOI_K = (() => {
-  const hair = mix('#b6cfae', '#8d978e', .2), hairBack = mix(hair, '#4c5e50', .32), top = mix('#efd47c', '#a59c86', .22), skirt = mix('#4c7a59', '#55605a', .28);
+  const hair = mix('#bccbb4', '#8d978e', .2), hairBack = mix(hair, '#4c5e50', .32), top = mix('#efd47c', '#a59c86', .22), skirt = mix('#4c7a59', '#55605a', .28);
   const eye = mix('#4f9a62', '#5f7466', .18), e3 = '#6b5cc2', tube = mix('#4e4294', '#5a5670', .2), trim = mix('#bcdcae', '#8f9c8c', .2), ribbon = mix('#e9c957', '#a0977f', .18);
   return {
     hair, hairBack, hairLine: mix(hairBack, hair, .35), hairHi: mix(hair, '#f6fbf2', .4),
     top, topFold: mix(top, '#8a7850', .32), trim, trimDk: mix(trim, '#4c6a50', .35), button: mix(trim, '#3f5e45', .45),
     skirt, skirtFold: mix(skirt, '#22382a', .35), hem: mix(skirt, '#22382a', .22), flower: '#eceee4', flowerC: mix(ribbon, skirt, .25), vine: mix(skirt, '#dfe8d6', .42),
     skin: P.skin, blush: P.blush, shoe: '#2f2b35', shoeHi: '#6a6474',
-    hat: '#2f2b36', hatLt: '#47424f', hatCrease: '#24212a', ribbon, ribbonDk: mix(ribbon, '#7a6430', .35),
+    hat: '#1d2220', hatLt: '#2d3632', brimTop: '#262e2a', brimUnder: '#0f1311', ribbon, ribbonDk: mix(ribbon, '#7a6430', .35),
     // 眼睛分层（第三版）：虹膜、虹膜下半亮色、瞳孔、虹膜上沿阴影、眼白、粗上眼线
     eye, irisLt: mix(eye, '#c6efbe', .5), pupil: mix(eye, P.ink, .78), irisShade: alpha(mix(eye, P.ink, .8), .45), sclera: '#fbf8f3',
     lid: mix('#22382a', P.ink, .55), lash: mix('#22382a', P.ink, .5), brow: mix(hairBack, P.ink, .45),
@@ -57,9 +57,11 @@ const KOI_NECK = -248, KOI_WAIST = -192, KOI_HEAD = 1.2, KOI_UP = 100;
 const KOI_SH = [33, -234], KOI_L1 = 42, KOI_L2 = 40, KOI_HAND = 1.35;   // 肩、上臂、前臂（肘到袖口里的腕点）、手的放大（照姐姐）
 const KOI_E3 = { r: 11.5, hang: [-17, -228], len: 20 };   // 第三只眼：半径；挂点（上身坐标，偏在身子左侧、腰上）和挂绳长
 const KOI_SIT_SK = [1.08, 0, 0, .72, 0, .28 * KOI_WAIST];
-// 帽檐：绕头一圈的带子，戴得往后仰，正面看是一道拱（头坐标，前沿 -138，两端 ±100 处低到 -110）
-const koiBand = x => -138 + 28 * (x / 100) ** 2;
-const KOI_BRIM = 100, KOI_DOME = 91;   // 帽檐半宽、帽身下沿半宽
+// 礼帽（头坐标）：帽身底是一个椭圆（中心 (0,-146)、半宽 70），帽檐是绕它一圈的扁椭圆环（半宽 108 ≈ 脸宽 1.7 倍），两端往上翘、边缘微波浪
+const KOI_HCY = -146, KOI_DRX = 70, KOI_DRY = 9, KOI_BRX = 108, KOI_BRY = 18, KOI_HAT_TILT = .09, KOI_HAT_SIT = 5;   // 整顶帽子往蝴蝶结那边（-x）歪戴、整体往下压 5 坐稳在头上
+const koiBase = x => KOI_HCY + KOI_DRY * Math.sqrt(Math.max(0, 1 - (x / KOI_DRX) ** 2));   // 帽身底沿（正面看的下半弧）
+// 帽檐轮廓：角 a 处的点（a=π/2 是正前方最低点）；dy 整体下移（画底面用），wav 波浪幅度
+const koiBrimPt = (a, dy = 0, kx = 1, wav = 2.2) => { const x = KOI_BRX * kx * Math.cos(a); return [x, KOI_HCY + KOI_BRY * Math.sin(a) + dy - 13 * (x / KOI_BRX) ** 4 + wav * Math.sin(4 * a + .6)]; };
 
 // ===================== 部件（载入时剪好） =====================
 // 心形：中心 (cx, cy)，宽约 2s，旋转 rot（同 satori.js）
@@ -141,28 +143,35 @@ const KOI_G = (() => {
   // 头发亮光：帽檐下面一道断开的弧，显出头是圆的
   g.hairHi = [[-48, -32], [-24, -8], [8, 22], [30, 46]].map(([a0, a1], i) => { const pts = []; for (let j = 0; j <= 6; j++) { const x = lerp(a0, a1, j / 6); pts.push([x, -106 - 14 * Math.sqrt(Math.max(0, 1 - (x / 62) ** 2))]); }
     return cut(rStroke(pts, u => 1 + 3 * Math.sin(Math.PI * u)), 84 + i, 4, .15, false); });
-  // 帽子（第三版，按美术意见）：黑色圆顶帽罩住整个头顶、盖住所有头发的顶部，两侧顺着头往下包到太阳穴；
-  // 帽身下沿贴着帽檐那道拱收进去；帽身一圈黄缎带（左边打个小结）；帽檐是绕头一圈的带子，正面看是一道往后仰的拱，比头宽一点。
-  // 体积：帽身暗面整片打底 + 左上一块亮面（koiHatLight），几道从缎带往上散开的折痕。
-  const domeTop = [[KOI_DOME, koiBand(KOI_DOME)], [95, -142], [88, -170], [70, -194], [40, -209], [0, -214], [-40, -209], [-70, -194], [-88, -170], [-95, -142], [-KOI_DOME, koiBand(-KOI_DOME)]];
-  const domeBot = []; for (let i = 0; i <= 18; i++) { const x = -KOI_DOME + i / 18 * 2 * KOI_DOME; domeBot.push([x, koiBand(x)]); }
-  g.dome = cut([...domeTop, ...domeBot.slice(1, -1)], 100, 9, .5);
-  g.domeClip = polyPath(spline([...domeTop, ...domeBot.slice(1, -1)], 3, true), true);
-  g.domeLight = polyPath(ellPts(-22, -186, 72, 40, 40, -.1), true);
-  g.creases = [-60, -24, 20, 56].map((x, i) => { const y0 = koiBand(x) - 20, x1 = x * 1.18, y1 = y0 - 30 + Math.abs(x) * .14;
-    return cut([[x - 1.4, y0], [lerp(x, x1, .5) - .8, lerp(y0, y1, .5)], [x1, y1], [lerp(x, x1, .5) + .8, lerp(y0, y1, .5)], [x + 1.4, y0]], 101 + i, 8, .2, false); });
-  const rib = (lo, hi, n = 20) => { const a = [], b = []; for (let i = 0; i <= n; i++) { const x = lerp(-KOI_DOME + 2, KOI_DOME - 2, i / n), c = 1 - (x / KOI_DOME) ** 2; a.push([x, koiBand(x) - hi(c)]); b.unshift([x, koiBand(x) - lo(c)]); } return [...a, ...b]; };
-  g.ribbon = cut(rib(c => 2 + 3 * c, c => 13 + 5 * c), 106, 6, .25, false);
-  g.ribbonHi = cut(rib(c => 11.5 + 4.6 * c, c => 13 + 5 * c), 107, 6, .1, false);
-  const bx = -64, by = koiBand(bx) - 12;
-  g.ribbonBow = cut(RIG_SHAPES.bow.map(([x, y]) => [bx + x * 1.15, by + y * 1.05]), 108, 3, .2, false);
-  g.ribbonKnot = cut(ellPts(bx, by + .5, 3.4, 3.8, 10), 109, 2, .05);
-  const brimTop = [], brimBot = [];
-  for (let i = 0; i <= 24; i++) { const x = lerp(-KOI_BRIM, KOI_BRIM, i / 24), c = 1 - (x / KOI_BRIM) ** 2; brimTop.push([x, koiBand(x) - 4 - 4 * c]); brimBot.unshift([x, koiBand(x) + 2.5 + 6.5 * c]); }
-  g.brim = cut([...brimTop, ...brimBot], 110, 6, .3);
-  // 帽檐上面一道亮边（两层纸）：看得出帽檐是一圈翻起来的硬边
-  const brimHi = brimTop.slice(2, -2).map(([x, y]) => [x, y + 2.2]);
-  g.brimHi = cut(rStroke(brimHi, u => .8 + 2 * Math.sin(Math.PI * u)), 111, 6, .1, false);
+  // 帽子（礼帽）：半球形圆顶罩住头顶和所有头发的顶部；帽檐绕头一整圈、比头宽一截，正面看是一道扁环，两端上翘、边缘微波浪；
+  // 帽檐分两层：底面（深）往下错开一点，只在前沿和两端露出一道薄边；顶面（浅一点）被帽身压住后半圈。
+  // 帽身底一圈宽黄缎带，左侧（-x）系一个大蝴蝶结、垂两条短飘带。体积：帽身暗面整片 + 左上一块亮面（koiHatLight）。
+  const brimRing = (dy, kx, wav) => Array.from({ length: 48 }, (_, i) => koiBrimPt(i / 48 * TAU, dy, kx, wav));
+  g.brimUnder = cut(brimRing(6, .985, 2.2), 110, 6, .3);
+  g.brim = cut(brimRing(0, 1, 2.2), 112, 6, .3);
+  // 帽檐前沿一道亮边：沿正面那半圈、稍往里收
+  g.brimHi = cut(rStroke(Array.from({ length: 17 }, (_, j) => { const a = Math.PI * (.12 + .76 * j / 16), [x, y] = koiBrimPt(a, 0, .97, 2.2); return [x, y - 3]; }), u => .6 + 1.8 * Math.sin(Math.PI * u)), 111, 6, .1, false);
+  const domeTop = [[KOI_DRX, KOI_HCY], [73, -160], [72, -178], [64, -198], [47, -214], [24, -223], [0, -226], [-24, -223], [-47, -214], [-64, -198], [-72, -178], [-73, -160], [-KOI_DRX, KOI_HCY]];
+  const domeBot = []; for (let i = 1; i < 18; i++) { const x = -KOI_DRX + i / 18 * 2 * KOI_DRX; domeBot.push([x, koiBase(x)]); }
+  g.dome = cut([...domeTop, ...domeBot], 100, 9, .5);
+  g.domeClip = polyPath(spline([...domeTop, ...domeBot], 3, true), true);
+  g.domeLight = polyPath(ellPts(-22, -194, 46, 30, 40, -.3), true);
+  // 帽身底的一道浅凹：缎带上面一道暗弧，看得出帽身是圆的
+  g.creases = [cut(rStroke(Array.from({ length: 15 }, (_, j) => { const x = lerp(-60, 60, j / 14); return [x, koiBase(x) - 21 - 2 * (1 - (x / 70) ** 2)]; }), u => .5 + 1.6 * Math.sin(Math.PI * u)), 101, 6, .1, false)];
+  const rib = (lo, hi, n = 20) => { const a = [], b = []; for (let i = 0; i <= n; i++) { const x = lerp(-KOI_DRX + 1, KOI_DRX - 1, i / n); a.push([x, koiBase(x) - hi]); b.unshift([x, koiBase(x) - lo]); } return [...a, ...b]; };
+  g.ribbon = cut(rib(1, 17), 106, 6, .25, false);
+  g.ribbonHi = cut(rib(14.5, 17), 107, 6, .1, false);
+  // 大蝴蝶结（结心 (bx,by)）：两只圆耳朵往外上方张开，两条飘带垂到帽檐下面
+  const bx = -58, by = koiBase(-58) - 9;
+  const loopL = [[0, -3], [-7, -12], [-19, -19], [-31, -18], [-37, -9], [-36, 2], [-29, 9], [-15, 8], [-2, 4]];
+  const tailL = [[-2, 3], [-9, 14], [-15, 28], [-17, 38], [-11, 34], [-6, 39], [-4, 26], [2, 6]];
+  const tailR = [[-1, 5], [5, 17], [8, 30], [5, 41], [11, 37], [16, 40], [14, 26], [4, 4]];
+  const at = pts => pts.map(([x, y]) => [bx + x, by + y]);
+  g.bowTails = [cut(at(tailL), 113, 3, .2), cut(at(tailR), 114, 3, .2)];
+  g.ribbonBow = [cut(at(loopL), 108, 3, .25), cut(at(rMirror(loopL)), 115, 3, .25)];
+  // 蝴蝶结耳朵里的褶：从结心往外两道暗线
+  g.bowFolds = [[-1, 1], [1, 1], [-1, -1], [1, -1]].map(([sd, k], i) => cut(rStroke([[bx + sd * 5, by + (k > 0 ? -1 : 2)], [bx + sd * 16, by + (k > 0 ? -9 : 4)], [bx + sd * 27, by + (k > 0 ? -12 : 4)]], u => .5 + 1.2 * Math.sin(Math.PI * u)), 116 + i, 3, .05, false));
+  g.ribbonKnot = cut(ellPts(bx, by, 6.5, 7.5, 12), 109, 2, .05);
   // ---- 玫瑰（握点为原点，花朝上）：细茎、一片叶子、花苞一层层卷起来 ----
   g.roseStem = cut(rStroke(rOpen([[1, 26], [0, 8], [-.5, -10], [0, -30]], 3), 2.6), 120, 5, .1, false);
   g.roseLeaf = cut(ellPts(7, -12, 7, 3, 12, -.5), 121, 3, .1);
@@ -220,10 +229,10 @@ function koiPose(pose, g, tt) {
     case 'wave': { const w = Math.sin(tt * 7);
       return { back: hangB, front: [1.95 + .05 * w, .95 + .38 * w, 'open', 'up', 1.12, 1.12], hr: .05, turn: .22, look: .45 }; }
     case 'point': return { back: hangB, front: [lerp(1.3, 1.85, g), lerp(.25, -.05, g), 'point', false, lerp(1, 1.12, g), lerp(1, 1.12, g)], hr: -.02, turn: .3, look: .6, lean: .03 * g };
-    case 'hat': {   // 帽檐右端（头坐标 (90,-122)）按歪头转到上身坐标，手腕停在它下面一点，手指搭到帽檐上
-      const hr = .12, px = 86 * KOI_HEAD, py = -110 * KOI_HEAD, bx = px * Math.cos(hr) - py * Math.sin(hr), by = KOI_NECK + px * Math.sin(hr) + py * Math.cos(hr);
+    case 'hat': {   // 帽檐右端（被手压歪压低后约在头坐标 (109,-110)）按歪头转到上身坐标，手腕停在它下面一点，手指扣到帽檐边上
+      const hr = .12, px = 102 * KOI_HEAD, py = -110 * KOI_HEAD, bx = px * Math.cos(hr) - py * Math.sin(hr), by = KOI_NECK + px * Math.sin(hr) + py * Math.cos(hr);
       const L = KOI_HAT_ARM, [a, b] = koiIK(sx, sy - 8, bx - 4, by + 14, KOI_L1 * L, KOI_L2 * L, -1);
-      return { back: hangB, front: [a, b, 'open', 'hat', L, L], hr, turn: .18, look: .5, lookY: -.4, hatRot: .07, hatDown: 5, shrug: 8 };
+      return { back: hangB, front: [a, b, 'open', 'hat', L, L], hr, turn: .18, look: .5, lookY: -.4, hatRot: .19, hatDown: 13, shrug: 8 };
     }
     case 'skip': {   // 离地 4..32 起伏；后腿往后踢起，前腿伸直略往前；两手往外张
       const ph = Math.sin(tt * 5.2);
@@ -345,7 +354,7 @@ const KOI_RIG = {
     { name: 'browM', parent: 'head' },
     { name: 'lock', sides: true, parent: 'head', pivot: (k, sd) => [sd * 58, -112], rot: k => -k.hr * .5, sway: (k, sd) => [.02, 1.4, sd], spring: { len: 100, gain: .7, f: 2.3, max: .3 } },
     { name: 'bangs', parent: 'head', at: k => [k.turn * 5, 0] },
-    { name: 'hat', parent: 'head', pivot: [0, -140], at: k => [k.turn * 4, k.ps.hatDown || 0], rot: k => (k.ps.hatRot || 0) + .012 * Math.sin(k.tt * 1.2 + .5) },
+    { name: 'hat', parent: 'head', pivot: [0, -140], at: k => [k.turn * 4, KOI_HAT_SIT + (k.ps.hatDown || 0)], rot: k => KOI_HAT_TILT + (k.ps.hatRot || 0) + .012 * Math.sin(k.tt * 1.2 + .5) },
     { name: 'sweatM', when: k => k.md.sweat, parent: 'head', at: k => [66, -104 + 3 * ((k.tt * 2) % 1)], rot: .15 },
   ],
   layers: [
@@ -393,15 +402,19 @@ const KOI_RIG = {
     // 举起来的手臂：袖子压在鬓发外面、帽子里面；挥手的手也在这里
     koiSleeves(koiUp),
     koiHands(A => A.flag === 'up'),
-    // 帽子：帽身（暗面整片 + 亮面）→ 折痕 → 黄缎带和小结 → 帽檐（压住帽身下沿和所有头发的顶）
+    // 帽子：帽檐底面（深，往下错开）→ 帽檐顶面 → 亮边 → 帽身（暗面整片 + 亮面）压住帽檐后半圈 → 浅凹 → 黄缎带 → 飘带 → 蝴蝶结
+    { items: [['brimUnder', 'hat', 'brimUnder']], sh: 'mid' },
+    { items: [['brim', 'hat', 'brimTop']], gr: false },
+    { items: [['brimHi', 'hat', 'hatLt', false]], gr: false },
     { items: [['dome', 'hat', 'hat']], sh: 'big' },
     { call: koiHatLight },
-    { items: [['creases', 'hat', 'hatCrease', false]], gr: false, al: .8 },
+    { items: [['creases', 'hat', 'brimUnder', false]], gr: false, al: .7 },
     { items: [['ribbon', 'hat', 'ribbon']], sh: 'tiny' },
     { items: [['ribbonHi', 'hat', 'white', false]], gr: false, al: .35 },
-    { items: [['ribbonBow', 'hat', 'ribbon'], ['ribbonKnot', 'hat', 'ribbonDk']], sh: 'tiny' },
-    { items: [['brim', 'hat', 'hat']], sh: 'mid' },
-    { items: [['brimHi', 'hat', 'hatLt', false]], gr: false },
+    { items: [['bowTails', 'hat', 'ribbonDk']], sh: 'tiny' },
+    { items: [['ribbonBow', 'hat', 'ribbon']], sh: 'tiny' },
+    { items: [['bowFolds', 'hat', 'ribbonDk', false]], gr: false, al: .8 },
+    { items: [['ribbonKnot', 'hat', 'ribbon']], sh: 'tiny' },
     // 压帽子的那只手：只有手压在帽檐外面
     koiHands(A => A.flag === 'hat'),
     // 表情道具
@@ -410,7 +423,7 @@ const KOI_RIG = {
   anchors(k) {
     const { AB, AF, B } = k;
     return { head: rApply(B.head, [0, -70]), hands: [AB.tip, AF.tip].sort((a, b) => a[0] - b[0]), tip: AF.tip, eye3: rApply(B.eye3, [0, 0]),
-      hat: rApply(B.hat, [0, -214]), rose: k.rose ? rApply(B.rose, [0, -40]) : null };
+      hat: rApply(B.hat, [0, -226]), rose: k.rose ? rApply(B.rose, [0, -40]) : null };
   },
 };
 

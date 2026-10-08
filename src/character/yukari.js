@@ -74,8 +74,20 @@ function yukTaijiPts(r) {
   for (let k = 1; k < 12; k++) { const a = -Math.PI / 2 - k / 12 * Math.PI; out.push([r / 2 * Math.cos(a), r / 2 + r / 2 * Math.sin(a)]); }
   return out;
 }
-// 帽檐（头坐标）：绕头一圈的带子，戴得往后仰，正面看是一道拱：正中 -150，两端（x = ±86）低到 -106
-const yukBand = x => -150 + 44 * (x / 86) ** 2;
+// 帽檐（头坐标）：绕头一圈的带子，戴得往后仰，正面看是一道拱：正中 -146，两端（x = ±78）低到 -106（帽子贴头，比脸宽一点点）
+const yukBand = x => -146 + 40 * (x / 78) ** 2;
+// 帽子缎带的大蝴蝶结（结为原点）：细带子圈出来的空心长环。L 环长、W 半宽、dir 指向、bend 往一侧弯
+function yukLoopPts(L, W, dir, bend) {
+  const pts = [];
+  for (let k = 0; k <= 36; k++) { const ph = k / 36 * TAU, u = (1 - Math.cos(ph)) / 2, a = u * L, b = W * Math.sin(ph) * Math.sqrt(u) + bend * Math.sin(Math.PI * u) * u;
+    pts.push([a * Math.cos(dir) - b * Math.sin(dir), a * Math.sin(dir) + b * Math.cos(dir)]); }
+  return pts;
+}
+// 飘带：沿中线 pts 宽 w 的细带，末端剪成燕尾（中间往回凹 notch）
+function yukTailPts(pts, w, notch) {
+  const o = rStroke(pts, w), n = pts.length, [x1, y1] = pts[n - 1], [x0, y0] = pts[n - 2], l = Math.hypot(x1 - x0, y1 - y0) || 1;
+  return [...o.slice(0, n), [x1 - (x1 - x0) / l * notch, y1 - (y1 - y0) / l * notch], ...o.slice(n)];
+}
 // 手：Q 版手比 RIG_SHAPES 的胖一圈（宽 ×1.4），指尖点不变
 const yukHandPts = pts => pts.map(([x, y]) => [x * 1.4, y]);
 const YUK_G = (() => {
@@ -152,31 +164,35 @@ const YUK_G = (() => {
   const tipsR = [[82, 146], [70, 128], [62, 150], [50, 130], [38, 148], [24, 128], [10, 142], [0, 130]], tipsL = [[-10, 144], [-24, 128], [-37, 149], [-50, 130], [-62, 148], [-71, 128], [-81, 144]];
   g.backHair = cut([[0, -176], [40, -172], ...rOpen(sideR, 5), ...tipsR, ...tipsL, ...rOpen(sideL, 5).reverse(), [-40, -172]], 121, 9, .8, false);
   g.hairStrands = [-56, -30, 0, 30, 56].map((x0, i) => { const pts = []; for (let y = -40; y <= 130; y += 12) pts.push([x0 + 4 * Math.sin(y * .06 + i * 1.7) + y * .06 * Math.sign(x0 || 1), y]); return cut(rStroke(rOpen(pts, 4), u => 2.4 - 1.5 * u), 122 + i, 6, .2, false); });
-  // 鬓发：从太阳穴（帽檐下）垂下来的波浪长发绺，比脸还靠外；胸口高度系红蝴蝶结，下面再垂一截发尾（根在 (±58,-110)）
-  const lockR = [...rOpen([[50, -128], [66, -118], [75, -86], [79, -50], [74, -16], [80, 18], [76, 46], [80, 74], [74, 96]], 4), [76, 108], [70, 122], [67, 106], [62, 116], [61, 94],
+  // 鬓发：从太阳穴（帽檐下）垂下来的波浪长发绺，比脸还靠外；下段（腰到大腿）系红蝴蝶结，发尾从结下面散开（根在 (±58,-110)）
+  const lockR = [...rOpen([[50, -128], [66, -118], [75, -86], [79, -50], [74, -16], [80, 18], [76, 46], [80, 74], [74, 96]], 4), [80, 114], [86, 136], [75, 124], [71, 144], [65, 124], [57, 136], [60, 104], [61, 94],
     ...rOpen([[63, 74], [60, 46], [64, 18], [58, -16], [62, -50], [58, -84], [48, -112]], 4)];
   g.lockR = cut(lockR, 140, 6, .5, false); g.lockL = cut(rMirror(lockR).map(([x, y]) => [x, y + (y > 80 ? 3 : 0)]), 141, 6, .5, false);
-  g.lockBow = cut(RIG_SHAPES.bow.map(([x, y]) => [x * 1.15, y * 1.15]), 142, 3, .2, false);
+  g.lockBow = cut(RIG_SHAPES.bow.map(([x, y]) => [x * 1.3, y * 1.3]), 142, 3, .2, false);
   g.lockKnot = cut(ellPts(0, 0, 3, 3.4, 8), 144, 2, .1, false);
   // 刘海：中间分开、左右两大绺，下缘一排尖刚好压到眼睛上沿
   g.bangs = cut([[-68, -156], [68, -156], [67, -108], [63, -80], [55, -97], [47, -74], [37, -93], [27, -76], [17, -95], [8, -79], [2, -100], [-4, -82], [-12, -97], [-22, -76], [-33, -94], [-44, -74], [-54, -97], [-63, -80], [-67, -108]], 146, 6, .5, false);
   g.bangLines = [[27, -76, 30, -126], [8, -79, 6, -130], [-22, -76, -25, -126], [47, -74, 52, -118], [-44, -74, -50, -116]].map(([x0, y0, x1, y1], i) => cut([[x0 - .9, y0], [x1 - 1.7, y1], [x1 + 1.7, y1], [x0 + .9, y0]], 147 + i, 8, .2, false));
   // 睡帽（照帕秋莉的画法）：帽子罩住整个头顶，两侧顺着头往下包到太阳穴；帽顶下沿贴着帽檐那道拱收进去；
-  // 帽檐是一圈白荷叶边，上面绕一道红缎带，右前方打一个红蝴蝶结；褶子从帽檐往上往外散。
-  const domeTop = [[86, -110], [96, -134], [99, -162], [90, -188], [66, -207], [30, -217], [-8, -219], [-46, -213], [-77, -196], [-96, -168], [-98, -138], [-88, -110]];
-  const domeBot = []; for (let k = 0; k <= 16; k++) { const x = -86 + k / 16 * 172; domeBot.push([x, yukBand(x) - 4]); }
+  // 比旧版小一圈（宽 ×0.9、高 ×0.87），贴头。帽檐是一圈白荷叶边，上面绕一道细红缎带；褶子从帽檐往上往外散。
+  // 缎带在正面偏右打一个大蝴蝶结：两个细带圈成的空心长环高高立起、伸出帽顶，一个往左上一个往右上（各挂弹簧），结下垂两条燕尾飘带。
+  const domeTop = [[86, -110], [96, -134], [99, -162], [90, -188], [66, -207], [30, -217], [-8, -219], [-46, -213], [-77, -196], [-96, -168], [-98, -138], [-88, -110]].map(([x, y]) => [x * .9, -146 + (y + 150) * .87]);
+  const domeBot = []; for (let k = 0; k <= 16; k++) { const x = -78 + k / 16 * 156; domeBot.push([x, yukBand(x) - 4]); }
   g.capPuff = cut([...domeTop, ...domeBot], 160, 9, .8);
   g.capPuffClip = polyPath(spline([...domeTop, ...domeBot], 3, true), true);
-  g.capLight = polyPath(ellPts(-20, -190, 102, 90, 40), true);   // 帽顶亮面：留出右下一圈浅影
-  g.capPleats = [-64, -38, -12, 14, 40, 64].map((x, i) => { const y0 = yukBand(x) - 7, x1 = x * 1.3, y1 = y0 - 42 + Math.abs(x) * .12, xm = lerp(x, x1, .5) + x * .05, ym = lerp(y0, y1, .5);
+  g.capLight = polyPath(ellPts(-18, -181, 92, 78, 40), true);   // 帽顶亮面：留出右下一圈浅影
+  g.capPleats = [-58, -34, -11, 13, 36, 58].map((x, i) => { const y0 = yukBand(x) - 7, x1 = x * 1.3, y1 = y0 - 37 + Math.abs(x) * .12, xm = lerp(x, x1, .5) + x * .05, ym = lerp(y0, y1, .5);
     return cut([[x - 1.9, y0], [xm - 1.1, ym], [x1, y1], [xm + 1.1, ym], [x + 1.9, y0]], 161 + i, 9, .25, false); });
-  const frTop = rScallop(u => { const x = lerp(-92, 92, u), v = x / 92; return [x, yukBand(x) - 9 - 4 * v * v]; }, 15, 2.6);
-  const frBot = rScallop(u => { const x = lerp(94, -94, u); return [x, yukBand(x) + 10]; }, 13, 6.2);
+  const frTop = rScallop(u => { const x = lerp(-84, 84, u), v = x / 84; return [x, yukBand(x) - 9 - 4 * v * v]; }, 14, 2.6);
+  const frBot = rScallop(u => { const x = lerp(86, -86, u); return [x, yukBand(x) + 10]; }, 12, 6.2);
   g.capFrill = cut([...frTop, ...frBot], 166, 4, .5, false);
-  const bandL = []; for (let k = 0; k <= 18; k++) { const x = -90 + k * 10; bandL.push([x, yukBand(x) - 3]); }
-  g.capBand = cut(rStroke(bandL, u => 9.5 - 1.5 * Math.abs(2 * u - 1)), 165, 8, .3, false);
-  g.capBow = cut(RIG_SHAPES.bow.map(([x, y]) => [x * 1.9, y * 1.65]), 167, 3, .3, false);
-  g.capKnot = cut(ellPts(0, 0, 4.2, 4.8, 10), 168, 2, .1, false);
+  const bandL = []; for (let k = 0; k <= 18; k++) { const x = -82 + k * 82 / 9; bandL.push([x, yukBand(x) - 4]); }
+  g.capBand = cut(rStroke(bandL, u => 5 - 1 * Math.abs(2 * u - 1)), 165, 8, .2, false);
+  // 大蝴蝶结（capBow 骨头坐标，结为原点）：左环长 126 往左上斜着耷拉、右环长 142 往右上立高（右环顶高出帽顶约 60），环带宽 4.6；结下两条燕尾飘带
+  g.capLoopL = cut(rStroke(yukLoopPts(126, 27, -Math.PI / 2 - .88, 14), 4.6), 167, 8, .2, false);
+  g.capLoopR = cut(rStroke(yukLoopPts(142, 23, -Math.PI / 2 + .5, -12), 4.6), 169, 8, .2, false);
+  g.capTails = [[[-1, 2], [-8, 12], [-11, 22], [-17, 32]], [[1, 2], [9, 10], [15, 18], [19, 29]]].map((c0, i) => cut(yukTailPts(rOpen(c0, 3), 4.6, 4.5), 170 + i, 5, .15, false));
+  g.capKnot = cut(ellPts(0, 0, 4, 4.6, 10), 168, 2, .1, false);
   return g;
 })();
 
@@ -267,11 +283,15 @@ const YUK_RIG = {
     // 后发：垂在背后，只跟一点头的转动（绕脖子把头的转角退回去大半），带弹簧
     { name: 'hairB', parent: 'head', rot: k => -k.hr * .85, sway: [.008, 1.1, .5], spring: { len: 200, gain: .5, f: 1.5, max: .12 } },
     { name: 'lock', sides: true, parent: 'head', pivot: (k, sd) => [sd * 58, -110], rot: k => -k.hr * .55, sway: (k, sd) => [.02, 1.5, sd], spring: { len: 150, gain: .6, f: 2, max: .25 } },
-    { name: 'lockBow', sides: true, parent: (k, sd) => 'lock' + (sd < 0 ? 'L' : 'R'), at: (k, sd) => [sd * 70, 50], rot: (k, sd) => sd * .2, scale: (k, sd) => sd < 0 ? [.92, .92] : null },
+    { name: 'lockBow', sides: true, parent: (k, sd) => 'lock' + (sd < 0 ? 'L' : 'R'), at: (k, sd) => [sd * 68, 95], rot: (k, sd) => sd * .2, scale: (k, sd) => sd < 0 ? [.92, .92] : null },
     { name: 'bangs', parent: 'head', at: k => [k.turn * 5, 0] },
     { name: 'cap', parent: 'head', at: k => [k.turn * 4, 0] },
     { name: 'capTop', parent: 'cap', pivot: [0, -150], sway: [.008, 1.2, .5], spring: { len: 60, dir: -Math.PI / 2, gain: .3, f: 2.6, max: .05 } },
-    { name: 'capBow', parent: 'cap', at: [50, yukBand(50) - 4], rot: .25, sway: [.04, 2.1, 0], spring: { len: 14, gain: .5, f: 3, max: .4 } },
+    { name: 'capBow', parent: 'cap', at: [24, yukBand(24) - 4], rot: .04 },
+    // 两个立起的环各绕结点轻晃（弹簧方向朝上）
+    { name: 'capLoopL', parent: 'capBow', sway: [.035, 1.7, .4], spring: { len: 110, dir: -Math.PI / 2, gain: .5, f: 2.2, max: .22 } },
+    { name: 'capLoopR', parent: 'capBow', sway: [.03, 1.45, 2.1], spring: { len: 120, dir: -Math.PI / 2, gain: .5, f: 1.9, max: .22 } },
+    { name: 'capTail', parent: 'capBow', sway: [.05, 1.9, 1], spring: { len: 40, gain: .6, f: 2.6, max: .35 } },
   ],
   layers: [
     // 伞面在最后面（扛在肩后）
@@ -330,7 +350,8 @@ const YUK_RIG = {
     { items: [['capPleats', 'capTop', 'pleat', false]], gr: false },
     { items: [['capFrill', 'cap', 'frill']], sh: 'mid' },
     { items: [['capBand', 'cap', 'red']], sh: 'tiny', gr: false },
-    { items: [['capBow', 'capBow', 'red']], sh: 'tiny', gr: false },
+    { items: [['capTails', 'capTail', 'red', false]], sh: 'tiny', gr: false },
+    { items: [['capLoopL', 'capLoopL', 'red'], ['capLoopR', 'capLoopR', 'red']], sh: 'tiny', gr: false },
     { items: [['capKnot', 'capBow', 'redKnot']], gr: false },
   ],
   anchors(k) {

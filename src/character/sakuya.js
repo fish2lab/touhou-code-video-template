@@ -27,16 +27,17 @@
 
 // ===================== 颜色（压暗、低饱和；蓝裙、白围裙、绿领结、银发要分得开） =====================
 const SAK_K = (() => {
-  const hair = '#dcdde4', hairBack = '#a7aab8', blue = '#4f6595', white = '#f5f2ee', green = '#4f9670', eye = '#5a76a6', silver = '#c8ccd5';
+  // 银发分四层，从后往前一层比一层亮（返修三）：后发最暗、偏蓝灰 → 鬓发和辫子 → 头顶 → 刘海最亮；高光近白、发丝线压暗
+  const hair = '#e7e9ef', hairCrown = '#cbcfdc', hairSide = '#b7bccd', hairBack = '#959bb2', blue = '#4f6595', white = '#f5f2ee', green = '#4f9670', eye = '#5a76a6', silver = '#c8ccd5';
   return {
-    hair, hairBack, hairLine: mix(hairBack, hair, .25), white,
+    hair, hairCrown, hairSide, hairBack, hairLine: mix(hairBack, hairSide, .3), hairShade: mix(hair, hairBack, .3), hairHi: '#fbfcfe', white,
     dress: blue, dressDeep: mix(blue, P.ink, .3), fold: mix(blue, P.ink, .22),
     apron: white, frill: '#f8f5f1', apronFold: mix(white, '#8790a8', .3),
     green, greenDeep: mix(green, P.ink, .35),
     skin: P.skin, blush: P.blush, sock: '#f3efea', sockLine: mix('#f3efea', '#8a8696', .35), shoe: '#2b2731', shoeHi: '#4a4452',
     // 眼睛分层（第三版）：灰蓝虹膜、下半亮蓝、深瞳孔、上沿阴影；粗眼线深灰
     eye, sclera: '#fbf8f3', irisLt: mix(eye, '#c3d8ee', .55), pupil: mix(eye, P.ink, .8), irisShade: alpha(mix(eye, P.ink, .8), .45),
-    lid: mix('#3a3440', P.ink, .55), lash: mix('#3a3440', P.ink, .55), brow: mix(hairBack, P.ink, .5),
+    lid: mix('#3a3440', P.ink, .55), lash: mix('#3a3440', P.ink, .55), brow: mix('#a7aab8', P.ink, .5),
     mouth: mix('#7a5a5a', P.ink, .5), mouthIn: mix(P.ribbonRed, P.ink, .45), tongue: mix(P.blush, P.ribbonRed, .45),
     sweat: mix(P.ribbonBlue, P.cap, .62),
     // 道具：银怀表、飞刀、托盘和茶具
@@ -122,22 +123,26 @@ const SAK_G = (() => {
   // ---- 头（头坐标：脖子关节为原点；下巴 (0,-4)，头顶 -150） ----
   // 圆脸：两颊鼓、下巴小（和帕秋莉同一张脸型，全员统一）
   g.face = cut([[0, -4], [13, -6], [29, -13], [45, -27], [57, -46], [63, -70], [64, -98], [59, -124], [42, -142], [0, -150], [-42, -142], [-59, -124], [-64, -98], [-63, -70], [-57, -46], [-45, -27], [-29, -13], [-13, -6]], 100, 7, .5);
-  // 后发（返修二）：短 bob 的蓬松外轮廓——头顶到耳朵外侧一道饱满的圆弧，下巴高度往里收成三束内卷的弯尖；
+  // 头发四层（返修三），从后往前：后发（最暗）→ 鬓发 + 辫子 → 头顶发（亮面 + 发丝线）→ 刘海（最亮，一束一片纸，各自投影）。
+  // 第 1 层 后发：蓬松短 bob 的外沿，比鬓发宽出一圈，在脸两侧和下巴下面露出来，下沿三束内卷的弯尖；
   // 右边短、左边长一点（dy），不对称。sd = 1 画右半边（从头顶往下到后颈正中），左半边镜像后反向接上。
   const bobSide = (sd, dy) => {
-    const arc = Array.from({ length: 9 }, (_, i) => { const a = Math.PI / 2 - i / 8 * Math.PI * .62; return [sd * 79 * Math.cos(a), -110 - 62 * Math.sin(a)]; });
-    return [...rOpen([...arc.slice(0, -1), [sd * 78, -84], [sd * 75, -60], [sd * 74, -46 + dy * .5]], 4),
-      ...sakQ([sd * 74, -46 + dy * .5], [sd * 76, -24 + dy], [sd * 66, -18 + dy], 4), ...sakQ([sd * 66, -18 + dy], [sd * 68, -30 + dy], [sd * 64, -38 + dy], 3),
-      ...sakQ([sd * 64, -38 + dy], [sd * 62, -22 + dy], [sd * 52, -20 + dy], 4), ...sakQ([sd * 52, -24 + dy], [sd * 54, -32 + dy], [sd * 46, -36 + dy], 3),
-      ...sakQ([sd * 46, -36 + dy], [sd * 40, -24 + dy], [sd * 28, -26 + dy], 4), [sd * 14, -30], [0, -28]];
+    const arc = Array.from({ length: 9 }, (_, i) => { const a = Math.PI / 2 - i / 8 * Math.PI * .62; return [sd * 84 * Math.cos(a), -110 - 64 * Math.sin(a)]; });
+    return [...rOpen([...arc.slice(0, -1), [sd * 84, -84], [sd * 83, -62], [sd * 80, -40 + dy * .5]], 4),
+      ...sakQ([sd * 80, -40 + dy * .5], [sd * 83, -12 + dy], [sd * 72, -5 + dy], 4), ...sakQ([sd * 72, -5 + dy], [sd * 75, -18 + dy], [sd * 70, -28 + dy * .5], 3),
+      ...sakQ([sd * 70, -28 + dy * .5], [sd * 68, -6 + dy], [sd * 55, -2 + dy], 4), ...sakQ([sd * 55, -2 + dy], [sd * 58, -14 + dy], [sd * 50, -22 + dy * .5], 3),
+      ...sakQ([sd * 50, -22 + dy * .5], [sd * 44, -6 + dy], [sd * 32, -8 + dy], 4), [sd * 16, -22], [0, -22]];
   };
   g.backHair = cut([...bobSide(1, 0), ...bobSide(-1, 7).reverse().slice(1, -1)], 101, 8, .7, false);
-  // 鬓发（返修二）：外缘是一道鼓出去的圆弧（贴着后发的 bob），下端在下巴高度内卷成两束弯尖，轻轻包住脸颊；左边长一点
-  const lockPts = (sd, dy) => [[sd * 48, -128], ...rOpen([[sd * 48, -128], [sd * 68, -118], [sd * 79, -96], [sd * 79, -72], [sd * 70, -46 + dy * .5]], 4).slice(1),
-    ...sakQ([sd * 70, -46 + dy * .5], [sd * 68, -26 + dy], [sd * 56, -20 + dy], 4), ...sakQ([sd * 56, -20 + dy], [sd * 62, -30 + dy], [sd * 61, -40 + dy], 3),
-    ...sakQ([sd * 61, -40 + dy], [sd * 58, -30 + dy], [sd * 50, -28 + dy], 4), ...sakQ([sd * 50, -28 + dy], [sd * 56, -44 + dy * .5], [sd * 57, -62], 4),
-    ...rOpen([[sd * 57, -62], [sd * 58, -92], [sd * 52, -118]], 4).slice(1)];
+  // 第 2 层 鬓发：从耳朵前面垂到下巴，外缘比后发收进一圈（露出后发的暗边），内缘盖住脸颊外缘一点；下端内卷成两束弯尖；左边长一点
+  const lockPts = (sd, dy) => [[sd * 48, -128], ...rOpen([[sd * 48, -128], [sd * 67, -119], [sd * 76, -96], [sd * 75, -72], [sd * 68, -46 + dy * .5]], 4).slice(1),
+    ...sakQ([sd * 68, -46 + dy * .5], [sd * 67, -24 + dy], [sd * 56, -17 + dy], 4), ...sakQ([sd * 56, -17 + dy], [sd * 62, -28 + dy], [sd * 61, -38 + dy], 3),
+    ...sakQ([sd * 61, -38 + dy], [sd * 58, -28 + dy], [sd * 50, -26 + dy], 4), ...sakQ([sd * 50, -26 + dy], [sd * 55, -44 + dy * .5], [sd * 56, -62], 4),
+    ...rOpen([[sd * 56, -62], [sd * 57, -92], [sd * 52, -118]], 4).slice(1)];
   g.lockR = cut(lockPts(1, 0), 102, 6, .5, false); g.lockL = cut(lockPts(-1, 6), 103, 6, .5, false);
+  // 发丝线（粗细变化的细纸条）：中段最粗、两头尖
+  const strand = (pts, w, i) => cut(rStroke(pts, u => w * (.35 + .65 * Math.sin(Math.PI * Math.min(1, u * 1.15)))), 117 + i, 6, .1, false);
+  g.lockLines = [-1, 1].map((sd, i) => strand(sakQ([sd * 62, -122], [sd * 71, -88], sd > 0 ? [64, -36] : [-64, -32], 6), 1.8, i));
   // 细麻花辫（辫根为原点，朝 +y 垂下）：一节一节的锯齿 + 斜纹，辫梢在胸口高度系绿色小蝴蝶结，下面再垂一撮发尾
   const bl = [], br = []; for (let i = 0; i <= 7; i++) { const y = i * 7.4, w = 3.9 - i * .08; bl.push([-w - (i % 2) * 1.3, y]); br.unshift([w + ((i + 1) % 2) * 1.3, y]); }
   g.braid = cut([...bl, [0, 55], ...br], 104, 4, .2, false);
@@ -145,27 +150,36 @@ const SAK_G = (() => {
   g.tuft = cut([[-3.6, 52], [3.6, 52], [5.2, 62], [6.6, 72], [2.4, 67], [0, 77], [-2.4, 67], [-6.6, 72], [-5.2, 62]], 113, 3, .2, false);
   g.braidBow = cut(RIG_SHAPES.bow.map(([x, y]) => [x * .78, y * .72 + 53]), 114, 3, .2, false);
   g.braidKnot = cut(ellPts(0, 52.6, 2.2, 2.4, 8), 115, 2, .05, false);
-  // 头顶 + 刘海（返修：去掉头盔感）：头顶一道贴头的圆弧（左上、右侧各翘出一小撮），刘海在 x = 24 处斜分：
-  // 分缝左边三绺长发弯着斜跨额头、最长一绺尖落在左眼内眼角；右边两绺短的往外撇，露出一角额头。整片不对称。
-  const crown = (() => { const pts = Array.from({ length: 17 }, (_, i) => { const a = Math.PI - i / 16 * Math.PI; return [77 * Math.cos(a), -112 - 60 * Math.sin(a)]; });
-    return [...pts.slice(0, -1), [78, -121], [83, -116], [74, -112], [72, -110]]; })();
-  const PART = [24, -117];
-  const fringe = [
-    ...sakQ([72, -110], [75, -95], [68, -79]), ...sakQ([68, -79], [60, -88], [54, -102], 4),       // 右二：短，往外撇
-    ...sakQ([54, -102], [54, -90], [47, -79], 4), ...sakQ([47, -79], [31, -89], PART),            // 右一：短，尖在右眼上方
-    ...sakQ(PART, [6, -78], [-18, -59], 7), ...sakQ([-18, -59], [-12, -78], [-6, -95], 4),          // 左一：最长，斜跨额头到左眼内角
-    ...sakQ([-6, -95], [-20, -76], [-43, -67], 6), ...sakQ([-43, -67], [-37, -84], [-32, -100], 4),  // 左二：尖压在左眼外上方
-    ...sakQ([-32, -100], [-48, -84], [-63, -73], 5), ...sakQ([-63, -73], [-62, -92], [-72, -110], 4), // 左三：贴着鬓角
-  ];
-  g.bangs = cut([...crown.slice(0, -1), ...fringe.slice(0, -1)], 116, 6, .5, false);
-  // 发丝线：顺着每一绺弯下去（细纸条），头顶两道从发旋往两边散
-  const strand = (pts, w, i) => cut(rStroke(pts, u => w * (1 - .7 * u)), 117 + i, 6, .1, false);
-  g.bangLines = [
-    strand(sakQ([18, -132], [2, -94], [-12, -66], 6), 1.5, 0), strand(sakQ([8, -136], [-14, -100], [-36, -73], 6), 1.4, 1),
-    strand(sakQ([-12, -138], [-34, -108], [-56, -79], 6), 1.3, 2), strand(sakQ([32, -132], [40, -104], [45, -84], 5), 1.3, 3),
-    strand(sakQ([50, -136], [60, -110], [65, -84], 5), 1.2, 4),
-  ];
-  g.crownLines = [strand(sakQ([18, -174], [-14, -172], [-40, -160], 5), 1.2, 6), strand(sakQ([26, -173], [48, -166], [60, -152], 4), 1.1, 7)];
+  // 第 3 层 头顶发：贴头的圆顶（右侧翘出一小撮），下沿在额头上方一道浅弧；刘海每两束之间的缝里露出它（比刘海暗一档）
+  const crownTop = Array.from({ length: 17 }, (_, i) => { const a = Math.PI - i / 16 * Math.PI; return [77 * Math.cos(a), -112 - 60 * Math.sin(a)]; });
+  g.crown = cut([...crownTop.slice(0, -1), [78, -121], [83, -116], [74, -110], ...sakQ([74, -110], [40, -124], [0, -118], 5), ...sakQ([0, -118], [-42, -122], [-77, -110], 5).slice(0, -1)], 116, 6, .5, false);
+  // 头顶两侧露出来的发丝线：从发旋（藏在头饰下）往两边放射
+  g.crownLines = [strand(sakQ([-40, -150], [-62, -140], [-72, -114], 5), 2, 3), strand(sakQ([44, -150], [64, -140], [73, -114], 5), 1.8, 4)];
+  // 第 4 层 刘海：每束一片饱满的弯叶（根部宽、尖端细），根藏在发箍下面；斜分在 x = 24，左边几束长、斜跨额头，右边两束短、往外撇。
+  // sakLeaf(根, 根半宽, 尖, 弯)：A 边朝光（左上），B 边背光；shade 是贴着 B 边的一条暗面，line 是顺着发束的一道发丝线
+  const sakLeaf = (R, w, T, bend, n = 6) => {
+    const dx = T[0] - R[0], dy = T[1] - R[1], L = Math.hypot(dx, dy), ux = dx / L, uy = dy / L, nx = -uy, ny = ux;
+    const at = (s, o) => [R[0] + dx * s + nx * o, R[1] + dy * s + ny * o];
+    const leaf = (o, ww) => { const A = at(0, o + ww), B = at(0, o - ww);
+      return [A, ...sakQ(A, at(.5, o * .5 + ww * 1.15 + bend * L), T, n), ...sakQ(T, at(.5, o * .5 - ww * 1.15 + bend * L), B, n), at(-.12, o)]; };
+    return { leaf: leaf(0, w), shade: leaf(-w * .55, w * .42).slice(1, -1), line: sakQ(at(.08, w * .25), at(.5, w * .3 + bend * L), at(.86, w * .05 + bend * L * .3), 6) };
+  };
+  const rootY = x => sakBand(x) + 6;
+  // 画的顺序从后往前：右二、左三、右一、左二、分缝边的短束、左一（最长，压在最前面，尖落在左眼内角）
+  const TUFTS = [
+    [[58, rootY(58)], 12, [72, -80], -.1],
+    [[-48, rootY(-48)], 13, [-68, -73], .1],
+    [[37, rootY(37)], 13, [48, -77], -.09],
+    [[-14, rootY(-14)], 15, [-45, -65], .15],
+    [[24, rootY(24)], 9, [29, -95], -.07],
+    [[16, rootY(16)], 17, [-20, -57], .17],
+  ].map(([R, w, T, b]) => sakLeaf(R, w, T, b));
+  g.tufts = TUFTS.map((t, i) => cut(t.leaf, 160 + i, 5, .4, false));
+  g.tuftShade = TUFTS.map((t, i) => cut(t.shade, 170 + i, 4, .2, false));
+  g.tuftLines = TUFTS.map((t, i) => i === 4 ? null : strand(t.line, 2.2, 8 + i)).filter(Boolean);
+  // 亮面：头顶偏左上（光源一侧）一道断开的弧形高光带，跨过刘海和缝里的头顶发，显出头是圆的
+  g.hairHi = [[-62, -42], [-34, -16], [-8, 8], [14, 26]].map(([a0, a1], i) => { const pts = []; for (let j = 0; j <= 6; j++) { const x = lerp(a0, a1, j / 6); pts.push([x, -126 - 14 * Math.sqrt(Math.max(0, 1 - (x / 74) ** 2))]); }
+    return cut(rStroke(pts, u => .8 + (3.6 - i * .5) * Math.sin(Math.PI * u)), 180 + i, 4, .15, false); });
   // 女仆头饰（返修）：头顶偏前的一道细发箍（sakBand），上面立着一圈白色荷叶边，像褶边王冠竖在头发上，两端变矮、藏进鬓发。
   const frTop = rScallop(u => { const x = lerp(-66, 66, u); return [x, sakBand(x) - 19 + 17 * (x / 66) ** 2]; }, 13, 4);
   const frBot = []; for (let k = 0; k <= 16; k++) { const x = lerp(68, -68, k / 16); frBot.push([x, sakBand(x) + 2]); }
@@ -331,18 +345,25 @@ const SAK_RIG = {
     { when: sakIs(p => p.fly), items: SAK_FLY_B.map(b => ['streak', b, 'streak', false]), gr: false, al: .55 },
     { when: sakIs(p => p.fly), items: sakKnifeItems(SAK_FLY_B), sh: 'tiny' },
     { when: sakIs(p => p.fly), items: SAK_FLY_B.map(b => ['knifeLine', b, 'bladeEdge', false]), gr: false },
-    // 脸、辫子、头顶和刘海、头饰、鬓发、眉毛
+    // 脸 → 辫子（辫根藏在鬓发下，从鬓发下端编出来）→ 第 2 层鬓发 → 眉毛 → 第 3 层头顶发 → 第 4 层刘海（一束一层，前一束在后一束上投细影）→ 高光 → 头饰
     { items: [['face', 'head', 'skin']], sh: 'mid' },
     { call: 'face' },
-    { items: [['braid', 'braidL', 'hair'], ['braid', 'braidR', 'hair'], ['tuft', 'braidL', 'hair'], ['tuft', 'braidR', 'hair']], sh: 'mid' },
+    { items: [['braid', 'braidL', 'hairSide'], ['braid', 'braidR', 'hairSide'], ['tuft', 'braidL', 'hairSide'], ['tuft', 'braidR', 'hairSide']], sh: 'tiny' },
     { items: [['braidLines', 'braidL', 'hairLine', false], ['braidLines', 'braidR', 'hairLine', false]], gr: false },
     { items: [['braidBow', 'braidL', 'green'], ['braidBow', 'braidR', 'green']], sh: 'tiny', gr: false },
     { items: [['braidKnot', 'braidL', 'greenDeep'], ['braidKnot', 'braidR', 'greenDeep']], gr: false },
+    { items: [['lockL', 'lockL', 'hairSide'], ['lockR', 'lockR', 'hairSide']], sh: 'mid' },
+    { items: [[k => k.G.lockLines[0], 'lockL', 'hairLine', false], [k => k.G.lockLines[1], 'lockR', 'hairLine', false]], gr: false, al: .7 },
     // 眉毛压在刘海下面（左眉被斜刘海遮住一半，右眉从露出的额头上看得见）
     { call: 'brows' },
-    { items: [['bangs', 'bangs', 'hair']], sh: 'mid' },
-    { items: [['bangLines', 'bangs', 'hairLine', false], ['crownLines', 'bangs', 'hairLine', false]], gr: false },
-    { items: [['lockL', 'lockL', 'hair'], ['lockR', 'lockR', 'hair']], sh: 'mid' },
+    { items: [['crown', 'bangs', 'hairCrown']], sh: 'mid' },
+    { items: [['crownLines', 'bangs', 'hairLine', false]], gr: false, al: .8 },
+    ...[0, 1, 2, 3, 4, 5].flatMap(i => [
+      { items: [[k => k.G.tufts[i], 'bangs', 'hair']], sh: 'tiny' },
+      { items: [[k => k.G.tuftShade[i], 'bangs', 'hairShade', false]], gr: false, al: .75 },
+    ]),
+    { items: [['tuftLines', 'bangs', 'hairLine', false]], gr: false, al: .75 },
+    { items: [['hairHi', 'bangs', 'hairHi', false]], gr: false, al: .9 },
     { items: [['hairband', 'band', 'hairBack']], gr: false },
     { items: [['frill', 'band', 'frill']], sh: 'tiny' },
     { items: [['frillPleats', 'band', 'apronFold', false]], gr: false },

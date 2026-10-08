@@ -5,7 +5,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>纯代码做一集东方视频</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Cpath d=%27M20 3a13 13 0 1 0 0 26a10 10 0 1 1 0-26z%27 fill=%27%23c9a24a%27/%3E%3C/svg%3E">
-<meta name="description" content="没有外部美术资源，没有 AI 生图：用 Canvas 2D 剪纸风引擎、七个剪纸角色和一条出片工具链，做一集东方科普视频的开源模板。">
+<meta name="description" content="开源模板：只用 JavaScript 和 Canvas 2D 做一集东方 Project 同人科普视频。十四个纯代码绘制的 Q 版剪纸角色（灵梦、魔理沙、芙兰、恋、妖梦、咲夜等）、油库里配音、角色曲 BGM、逐帧出片，无外部美术、无 AI 生图。">
+<meta name="keywords" content="东方Project,東方Project,Touhou,同人视频,科普视频,油库里,ゆっくり解説,Canvas 2D,程序化动画,剪纸动画,纯代码动画,视频模板,JavaScript 动画,procedural animation">
+<link rel="canonical" href="https://fish2lab.github.io/touhou-code-video-template/">
+<link rel="alternate" type="text/plain" title="llms.txt" href="https://fish2lab.github.io/touhou-code-video-template/llms.txt">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="纯代码做东方视频">
+<meta property="og:title" content="纯代码做一集东方视频：Canvas 剪纸角色 + 油库里配音 + 出片工具链">
+<meta property="og:description" content="十四个纯代码绘制的东方 Q 版剪纸角色和一条逐帧出片管线，无外部美术、无 AI 生图。MIT 开源模板。">
+<meta property="og:url" content="https://fish2lab.github.io/touhou-code-video-template/">
+<meta property="og:image" content="https://fish2lab.github.io/touhou-code-video-template/media/lineup.jpg">
+<meta property="og:image:alt" content="十四位 Q 版剪纸角色并排站立">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:locale:alternate" content="ja_JP">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@fish2lab">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "touhou-code-video-template",
+      "alternateName": ["纯代码做一集东方视频", "Touhou code-only video template"],
+      "description": "A template for making a Touhou Project fan explainer video entirely in JavaScript and Canvas 2D: deterministic frame engine, 14 procedurally drawn paper-cut chibi characters, AquesTalk (Yukkuri) voice-over, music-box BGM, headless MP4 renderer. No image assets, no AI-generated art.",
+      "codeRepository": "https://github.com/fish2lab/touhou-code-video-template",
+      "url": "https://fish2lab.github.io/touhou-code-video-template/",
+      "programmingLanguage": "JavaScript",
+      "runtimePlatform": "Node.js 20+, Chromium (Playwright), ffmpeg",
+      "license": "https://opensource.org/licenses/MIT",
+      "author": { "@type": "Person", "name": "fish2lab", "url": "https://x.com/fish2lab" },
+      "keywords": "Touhou Project, 東方Project, Canvas 2D, procedural animation, paper cut, Yukkuri, AquesTalk, video template",
+      "inLanguage": ["zh-CN", "ja", "en"],
+      "image": "https://fish2lab.github.io/touhou-code-video-template/media/lineup.jpg"
+    },
+    {
+      "@type": "VideoObject",
+      "name": "纯代码做一集东方视频：模板演示片",
+      "description": "92 秒演示片，全部画面由 Canvas 代码逐帧绘制。",
+      "thumbnailUrl": "https://fish2lab.github.io/touhou-code-video-template/media/lineup.jpg",
+      "embedUrl": "https://fish2lab.github.io/touhou-code-video-template/film/",
+      "uploadDate": "2026-10-04",
+      "duration": "PT1M32S"
+    }
+  ]
+}
+</script>
 <style>
 :root {
   --bg: #fcfcfb; --fg: #1b1a1f; --muted: #6c6872; --line: #e3e1e6; --code-bg: #f3f2f4; --link: #4b3b7a; --media-bg: #14111a;
@@ -46,6 +92,54 @@ footer p { margin-bottom: 10px; }
 @media (max-width: 640px) { body { font-size: 16px; } header.top { padding-block: 40px 20px; } .grid { grid-template-columns: 1fr; } h2 { margin-top: 56px; } }
 @media (prefers-reduced-motion: reduce) { video[autoplay] { animation: none; } }
 </style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "完全不用图片吗？",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "是。角色、背景、字、特效都是 Canvas 代码画的，页面不加载任何美术素材，也没有 AI 生图。"
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "为什么是这十四个角色？",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "其中十位是第 20–22 回「東方Project人気投票」（2024–2026）人妖部门三届前十的全部成员，三届是同一批人；另外四位来自「帕秋莉讲座」系列。"
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "要会画画吗？",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "不用，要会一点 JavaScript。角色是部件表，改颜色和轮廓就是新角色；场景是只依赖时间 t 的函数。"
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "能交给 AI agent 写吗？",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "能，这个仓库本身就是这样做的。先让 agent 读仓库里的 AGENTS.md。"
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "渲染要多久？",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "92 秒的演示片，在 4 核云端机器上开 3 个并行页面约 135 秒。"
+   }
+  }
+ ]
+}
+</script>
 </head>
 <body>
 
@@ -60,7 +154,7 @@ footer p { margin-bottom: 10px; }
 
   <header class="top">
     <h1>纯代码做一集东方视频</h1>
-    <p class="lead">这是一个模板。整集科普视频没有一张外部图片，也没有 AI 生图：剪纸风的魔导书、七个角色、手写字、配音和背景音乐，每一笔都是 JavaScript 在 Canvas 上画的，最后逐帧渲染成 MP4。</p>
+    <p class="lead">这是一个模板。整集科普视频没有一张外部图片，也没有 AI 生图：剪纸风的魔导书、十四个角色、手写字、配音和背景音乐，每一笔都是 JavaScript 在 Canvas 上画的，最后逐帧渲染成 MP4。</p>
     <div class="links">
       <a href="https://github.com/fish2lab/touhou-code-video-template">源码</a>
       <a href="film/">看完整演示片（92 秒，有声音）</a>
@@ -107,13 +201,13 @@ drawMoonIcon(c, lerp(x0, x1, u), y - 62, 44, P.moon, -.5 + u * 3);</code></pre>
 
 <main class="wrap">
 
-  <h2>七个角色，同一套 Q 版比例</h2>
-  <p>帕秋莉、琪露诺、蕾米莉亚、红美铃、八云蓝、八云紫、古明地觉。每个角色都是一组剪纸部件，绕着脖子、肩、肘转动，边缘不抖，「活」来自整片轻晃和投影。全员是约 2.4 头身的 Q 版，头和身子一样大，只有帽子和发饰高低不同，并排站才整齐。</p>
+  <h2>十四个角色，同一套 Q 版比例</h2>
+  <p>博丽灵梦、雾雨魔理沙、芙兰朵露、古明地恋、魂魄妖梦、十六夜咲夜、蕾米莉亚、古明地觉、藤原妹红、琪露诺，这十位是 2024–2026 年三届东方人气投票前十的全部成员；再加上帕秋莉、红美铃、八云紫、八云蓝。每个角色都是一组剪纸部件，绕着脖子、肩、肘转动，边缘不抖，「活」来自整片轻晃和投影。全员是约 2.4 头身的 Q 版，头和身子一样大，只有帽子和发饰高低不同，并排站才整齐。</p>
 </main>
 
 <div class="wide">
   <figure>
-    <img src="media/lineup.jpg" width="1600" height="582" alt="七位 Q 版纸片人并排站立，脸和身子一样大，下面写着名字" loading="lazy">
+    <img src="media/lineup.jpg" width="1600" height="582" alt="十四位 Q 版纸片人并排站立，脸和身子一样大，下面写着名字" loading="lazy">
     <figcaption>全部是 Canvas 代码画的，没有加载任何图片。样张页 <code>character.html</code> 可以看每个角色的全部姿势和表情。</figcaption>
   </figure>
 </div>
@@ -157,6 +251,13 @@ fxPlay('pinwheel-tiles', c, tau, { box: [x, y, w, h], t0: 1.2, speed: 1.5 });</c
   <h2>出片</h2>
   <p>出片脚本开几个无界面浏览器，把全片切成几段。每个浏览器逐帧调用同一个 <code>renderAt(t)</code>，导出 JPEG，直接通过管道交给 ffmpeg，不落盘。几段编码完拼接，再混上离线渲染的声音。</p>
   <p>92 秒的演示片，在一台 4 核的云端机器上用 3 个并行页面渲染，用了约 135 秒。想要 4K，加一个 <code>--scale 2</code>，建议放到自己的电脑上跑。</p>
+
+  <h2>常见问题</h2>
+  <p><b>完全不用图片吗？</b>是。角色、背景、字、特效都是 Canvas 代码画的，页面不加载任何美术素材，也没有 AI 生图。</p>
+  <p><b>为什么是这十四个角色？</b>其中十位是第 20–22 回「東方Project人気投票」（2024–2026）人妖部门三届前十的全部成员，三届是同一批人；另外四位来自「帕秋莉讲座」系列。</p>
+  <p><b>要会画画吗？</b>不用，要会一点 JavaScript。角色是部件表，改颜色和轮廓就是新角色；场景是只依赖时间 t 的函数。</p>
+  <p><b>能交给 AI agent 写吗？</b>能，这个仓库本身就是这样做的。先让 agent 读仓库里的 AGENTS.md。</p>
+  <p><b>渲染要多久？</b>92 秒的演示片，在 4 核云端机器上开 3 个并行页面约 135 秒。</p>
 
   <h2>开始</h2>
 <pre><code>git clone https://github.com/fish2lab/touhou-code-video-template

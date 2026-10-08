@@ -2,7 +2,7 @@
   "name": "touhou-code-video-template",
   "private": true,
   "version": "0.1.0",
-  "description": "纯代码做一集东方科普视频：Canvas 2D 剪纸风逐帧引擎 + 七个剪纸角色 + 油库里语音 + 角色曲 BGM + 出片工具链（模板仓库）",
+  "description": "纯代码做一集东方科普视频：Canvas 2D 剪纸风逐帧引擎 + 十四个剪纸角色 + 油库里语音 + 角色曲 BGM + 出片工具链（模板仓库）",
   "scripts": {
     "font": "node tools/fetch-font.mjs",
     "dev": "node tools/frames.mjs --grid 24",
